@@ -26,7 +26,7 @@ export default function ImageUploadSection() {
   };
 
   return (
-    <Card className="p-4 md:p-6 bg-white/50 backdrop-blur-sm border shadow-xl border-gray-200 w-full max-w-[100%] md:max-w-[80%] lg:max-w-[70%] mx-auto">
+    <Card className="p-4 md:p-6 bg-white/50 backdrop-blur-sm border shadow-xl border-gray-200 w-full max-w-[100%] md:max-w-[80%] mx-auto">
       <div className="flex flex-col items-center gap-4">
         <div className="w-full">
           {image ? (
