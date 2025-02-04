@@ -15,7 +15,7 @@ export const Button = ({
   const variantClass =
     variant === "outline"
       ? "border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-800"
-      : "bg-blue-500 text-white hover:bg-blue-600";
+      : "bg-yellow-500 text-white hover:bg-yellow-600";
 
   return (
     <button
