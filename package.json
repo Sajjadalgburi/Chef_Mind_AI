@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.11.0",
+    "@upstash/redis": "^1.34.4",
     "next": "15.1.6",
+    "openai": "^4.82.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
