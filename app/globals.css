@@ -4,6 +4,25 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+
+  background-color: #f5f5f5;
+  position: relative;
+  background-image: linear-gradient(
+      to right,
+      rgba(245, 245, 245, 0.9),
+      rgba(245, 245, 245, 0) 50%,
+      rgba(245, 245, 245, 0) 100%,
+      rgba(245, 245, 245, 0.9)
+    ),
+    radial-gradient(circle at center center, #ffffff, #f5f5f5),
+    repeating-radial-gradient(
+      circle at center center,
+      #ffffff,
+      #ffffff,
+      40px,
+      #f5f5f5 80px
+    );
+  background-blend-mode: overlay, multiply, normal;
 }
 
 @layer utilities {
