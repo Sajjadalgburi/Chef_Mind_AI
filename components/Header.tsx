@@ -12,7 +12,7 @@ export default function Header() {
             href="/"
             className="no-underline hover:bg-gray-100 rounded-md p-2 transition-colors"
           >
-            <span className="text-xl xs:text-2xl sm:text-2xl md:text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-600">
+            <span className="text-xl xs:text-2xl sm:text-2xl md:text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-yellow-600">
               Snap Cook
             </span>
           </Link>
