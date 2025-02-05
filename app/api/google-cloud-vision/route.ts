@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import vision from "@google-cloud/vision";
-
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
+import { NextResponse } from "next/server";
+import vision from "@google-cloud/vision";
+import fs from "fs";
+
+export async function GET() {
   try {
     // Ensure environment variable is set
     if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
@@ -15,15 +16,14 @@ export async function POST(request: NextRequest) {
 
     console.log("---- Google Cloud Vision Endpoint Hit ----");
 
-    // Read image as a binary buffer
-    const imageBuffer = await request.arrayBuffer(); // Use arrayBuffer() to get raw binary data
-
-    if (!imageBuffer) {
-      return NextResponse.json({ error: "No image provided" }, { status: 400 });
-    }
-
     // Create Google Cloud Vision client
     const client = new vision.ImageAnnotatorClient();
+
+    const filePath = `${process.cwd()}/public/testing-image.jpg`;
+
+    const request = {
+      image: { content: fs.readFileSync(filePath) },
+    };
 
     if (!client || typeof client.objectLocalization !== "function") {
       return NextResponse.json(
@@ -35,20 +35,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!request?.image?.content) {
+      return NextResponse.json(
+        {
+          error:
+            "No image provided. Maybe imported incorrectly? Check the file path.",
+        },
+        { status: 400 }
+      );
+    }
+
     // Perform Object Detection
-    const [result] = await client.objectLocalization({
-      image: { content: Buffer.from(imageBuffer) }, // Pass binary image data directly
-    });
+    const [result] = await client.objectLocalization(request);
 
     console.log("---- Google Cloud Vision Result ----");
     console.log(result);
     console.log("---- End of Google Cloud Vision Result ----");
-
-    const err = result.error?.message;
-
-    if (err) {
-      return NextResponse.json({ error: err }, { status: 500 });
-    }
 
     if (!result?.localizedObjectAnnotations?.length) {
       return NextResponse.json(
@@ -57,12 +59,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const err = result.error?.message;
+    if (err) {
+      return NextResponse.json({ error: err }, { status: 500 });
+    }
+
     const objects = result.localizedObjectAnnotations.map((obj) => ({
       name: obj.name,
       confidence: obj.score,
     }));
 
-    return NextResponse.json({ objects });
+    console.log("---- Objects ----", objects);
+
+    return NextResponse.json({ objects }, { status: 200 });
   } catch (error) {
     console.error("Error in Google Cloud Vision:", error);
     return NextResponse.json(
