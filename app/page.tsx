@@ -31,14 +31,39 @@ export default function Home() {
     reader.readAsDataURL(file);
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setLoading(true);
+
+    // Check for any errors
     if (!image) {
       toast.error("Please upload an image");
       setLoading(false);
       return;
     }
 
+    // pass the image url to the analyze-image route
+    const response = await fetch("/api/analyze-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ image }),
+    });
+
+    if (response.status === 400) {
+      toast.error("image was not uploaded correctly");
+      setLoading(false);
+      return;
+    }
+
+    if (!response.ok) {
+      toast.error("Error analyzing image... Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    const data = await response.json();
+    console.log("data that is returned from the analyze-image api\n", data);
     setLoading(true);
     setShowResults(false);
     setTimeout(() => setLoading(false), 2000);
