@@ -32,7 +32,17 @@ IMPORTANT:
 - IF YOU CANNOT DETECT ANY INGREDIENTS OR IMAGE IS NOT CLEAR, RETURN AN EMPTY ARRAY
 `;
 
-export async function POST(req: NextRequest) {
+export type IngredientsType = [
+  {
+    catagory: string;
+    name: string;
+    quantity: string;
+  }
+];
+
+export async function POST(
+  req: NextRequest
+): Promise<IngredientsType | NextResponse> {
   try {
     const { image } = await req.json();
 
