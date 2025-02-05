@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { OpenAI } from "openai";
-import fridge from "@/public/testing-image.jpg";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -41,11 +40,7 @@ export async function POST(req: NextRequest) {
 
     // 1. First, get Google Cloud Vision analysis
     const visionResponse = await fetch(visionApiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ image: fridge }),
+      method: "GET",
     });
 
     if (!visionResponse.ok) {
