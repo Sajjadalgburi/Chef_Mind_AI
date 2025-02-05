@@ -28,20 +28,18 @@ export async function POST(request: Request) {
     }
 
     const mapThroughIngredients = ingredientsArray
-      .map((ingredient) => ingredient.name)
+      .map((ingredient) => `${ingredient.category} ${ingredient.name}`)
       .join(", ");
 
     console.log("---- mapThroughIngredients ----", mapThroughIngredients);
 
-    const embedding = await openai.embeddings.create({
+    const res = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: mapThroughIngredients,
       encoding_format: "float",
     });
 
-    const embeddingData = embedding.data[0]?.embedding;
-
-    console.log("---- embeddingData ----", embeddingData);
+    const embeddingData = res.data?.[0]?.embedding;
 
     if (!embeddingData) {
       return NextResponse.json(
@@ -50,7 +48,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ embedding: embeddingData }, { status: 200 });
+    return NextResponse.json({ embeddingData }, { status: 200 });
   } catch (error) {
     console.error("Error generating embeddings:", error);
     return NextResponse.json(
