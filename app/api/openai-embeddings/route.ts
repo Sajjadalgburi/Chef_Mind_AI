@@ -39,7 +39,18 @@ export async function POST(request: Request) {
       encoding_format: "float",
     });
 
-    return NextResponse.json({ embedding });
+    const embeddingData = embedding.data[0]?.embedding;
+
+    console.log("---- embeddingData ----", embeddingData);
+
+    if (!embeddingData) {
+      return NextResponse.json(
+        { error: "Failed to generate embeddings" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ embedding: embeddingData }, { status: 200 });
   } catch (error) {
     console.error("Error generating embeddings:", error);
     return NextResponse.json(
