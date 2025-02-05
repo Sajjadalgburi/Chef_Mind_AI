@@ -34,7 +34,7 @@ IMPORTANT:
 
 export type IngredientsType = [
   {
-    catagory: string;
+    category: string;
     name: string;
     quantity: string;
   }
