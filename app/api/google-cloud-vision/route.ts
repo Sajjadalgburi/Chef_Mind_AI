@@ -46,7 +46,14 @@ export async function GET() {
     }
 
     // Perform Object Detection
-    const [result] = await client.objectLocalization(request);
+    const [result] = await client.annotateImage({
+      image: { content: request.image.content },
+      features: [
+        { type: "OBJECT_LOCALIZATION", maxResults: 10 }, // Detect objects
+        { type: "LABEL_DETECTION", maxResults: 10 }, // Detect broader labels (e.g., "Food", "Drink", "Bottle")
+        { type: "WEB_DETECTION" }, // test
+      ],
+    });
 
     console.log("---- Google Cloud Vision Result ----");
     console.log(result);
