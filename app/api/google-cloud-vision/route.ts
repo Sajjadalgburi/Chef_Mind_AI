@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("---- Google Cloud Vision Object Detection ----");
+    console.log("---- Google Cloud Vision Endpoint Hit ----");
 
     // Read image as a binary buffer
     const imageBuffer = await request.arrayBuffer(); // Use arrayBuffer() to get raw binary data
@@ -43,6 +43,12 @@ export async function POST(request: NextRequest) {
     console.log("---- Google Cloud Vision Result ----");
     console.log(result);
     console.log("---- End of Google Cloud Vision Result ----");
+
+    const err = result.error?.message;
+
+    if (err) {
+      return NextResponse.json({ error: err }, { status: 500 });
+    }
 
     if (!result?.localizedObjectAnnotations?.length) {
       return NextResponse.json(
