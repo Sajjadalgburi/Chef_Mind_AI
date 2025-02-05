@@ -31,8 +31,6 @@ export async function POST(request: Request) {
       .map((ingredient) => `${ingredient.category} ${ingredient.name}`)
       .join(", ");
 
-    console.log("---- mapThroughIngredients ----", mapThroughIngredients);
-
     const res = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: mapThroughIngredients,
@@ -48,7 +46,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ embeddingData }, { status: 200 });
+    return NextResponse.json({ embedding: embeddingData }, { status: 200 });
   } catch (error) {
     console.error("Error generating embeddings:", error);
     return NextResponse.json(
