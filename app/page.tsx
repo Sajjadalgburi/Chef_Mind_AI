@@ -6,6 +6,8 @@ import ImageUploadSection from "../components/ImageUploadSection";
 import Footer from "../components/Footer";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { IngredientsType } from "./api/analyze-image/route";
+import { generateIngredientEmbedding, getEmbeddingMetaData } from "@/helpers";
 
 export default function Home() {
   const [image, setImage] = useState<string | null>(null);
@@ -36,39 +38,60 @@ export default function Home() {
   const handleGenerate = async () => {
     setLoading(true);
 
-    // Check for any errors
-    if (!image) {
-      toast.error("Please upload an image");
+    try {
+      // Check for any errors
+      if (!image) {
+        toast.error("Please upload an image");
+        return;
+      }
+
+      // pass the image url to the analyze-image route
+      const response = await fetch("/api/analyze-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ image }),
+      });
+
+      if (response.status === 400) {
+        toast.error("image was not uploaded correctly");
+        return;
+      }
+
+      if (!response.ok) {
+        toast.error("Error analyzing image... Please try again.");
+        return;
+      }
+
+      const { ingredients }: { ingredients: IngredientsType } =
+        await response.json();
+
+      if (!ingredients) return;
+
+      const embeddingResponse = await generateIngredientEmbedding(ingredients);
+
+      if (
+        !embeddingResponse ||
+        embeddingResponse.error ||
+        !embeddingResponse.embedding
+      )
+        return;
+
+      const { embedding } = embeddingResponse;
+      if (embedding) {
+        const metadata = await getEmbeddingMetaData(embedding);
+        console.log("---- metadata ----", metadata);
+      }
+
+      setShowResults(false);
+    } catch (error) {
+      console.error("Error in handleGenerate:", error);
+
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // pass the image url to the analyze-image route
-    const response = await fetch("/api/analyze-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ image }),
-    });
-
-    if (response.status === 400) {
-      toast.error("image was not uploaded correctly");
-      setLoading(false);
-      return;
-    }
-
-    if (!response.ok) {
-      toast.error("Error analyzing image... Please try again.");
-      setLoading(false);
-      return;
-    }
-
-    const data = await response.json();
-    console.log("data that is returned from the analyze-image api\n", data);
-    setLoading(true);
-    setShowResults(false);
-    setTimeout(() => setLoading(false), 2000);
   };
 
   return (
