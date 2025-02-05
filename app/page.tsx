@@ -27,7 +27,9 @@ export default function Home() {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => setImage(e.target?.result as string);
+    reader.onload = (event) => {
+      setImage(event.target?.result as string);
+    };
     reader.readAsDataURL(file);
   };
 
