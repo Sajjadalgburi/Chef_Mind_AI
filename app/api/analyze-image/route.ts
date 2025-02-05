@@ -25,7 +25,12 @@ Your task is to analyze the following list of detected items and extract a struc
       "category": "Vegetable"
     }
   ]
-}`;
+}
+  
+IMPORTANT:
+- Do not include any other text or comments in your response, instead just output the JSON directly
+- IF YOU CANNOT DETECT ANY INGREDIENTS OR IMAGE IS NOT CLEAR, RETURN AN EMPTY ARRAY
+`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,46 +39,33 @@ export async function POST(req: NextRequest) {
     if (!image) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
-
-    // Construct the full URL for the Google Cloud Vision API
-    const visionApiUrl = `${req.nextUrl.origin}/api/google-cloud-vision`;
-
-    // 1. First, get Google Cloud Vision analysis
-    const visionResponse = await fetch(visionApiUrl, {
-      method: "GET",
-    });
-
-    if (!visionResponse.ok) {
-      throw new Error("Failed to analyze image with Google Cloud Vision");
-    }
-
     console.log("---- GPT-4 Analysis Endpoint Hit ----");
 
-    const { detectedItems } = await visionResponse.json();
-
-    // 2. Then, use GPT-4 to analyze the detected items
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
+
       messages: [
         {
-          role: "system",
-          content: mainPrompt,
-        },
-        {
           role: "user",
-          content: `Analyze these detected items and their confidence scores: ${JSON.stringify(
-            detectedItems
-          )}`,
+          content: [
+            { type: "text", text: mainPrompt },
+            {
+              type: "image_url",
+              image_url: { url: image },
+            },
+          ],
         },
       ],
-      temperature: 0.7,
-      max_tokens: 500,
+      store: true,
     });
-
-    const ingredients =
-      response.choices[0]?.message?.content || "No ingredients detected";
-
-    return NextResponse.json({ ingredients }, { status: 200 });
+    const ingredients = JSON.parse(
+      response.choices[0]?.message?.content || "No ingredients detected"
+    );
+    console.log("---- Got Ingredients Back ----");
+    return NextResponse.json(
+      { ingredients: ingredients.ingredients },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error analyzing fridge image:", error);
     return NextResponse.json(
