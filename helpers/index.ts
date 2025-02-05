@@ -1,6 +1,6 @@
 // Generate an embedding for a list of ingredient names
 export const generateIngredientEmbedding = async (
-  ingredientNames: string[]
+  ingredientNames: Array<{ category: string; name: string }>
 ) => {
   try {
     const res = await fetch("/api/openai-embeddings", {
@@ -11,16 +11,10 @@ export const generateIngredientEmbedding = async (
       body: JSON.stringify({ ingredients: ingredientNames }),
     });
 
-    const {
-      embedding,
-      errorMessage,
-    }: {
-      embedding: number[];
-      errorMessage: string;
-    } = await res.json();
+    const { embedding }: { embedding: Array<number> } = await res.json();
 
-    if (errorMessage) {
-      return { error: errorMessage };
+    if (!embedding) {
+      return { error: "No embedding found" };
     }
 
     return { embedding };
