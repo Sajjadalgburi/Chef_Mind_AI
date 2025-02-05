@@ -39,13 +39,11 @@ export default function Home() {
     setLoading(true);
 
     try {
-      // Check for any errors
       if (!image) {
         toast.error("Please upload an image");
         return;
       }
 
-      // pass the image url to the analyze-image route
       const response = await fetch("/api/analyze-image", {
         method: "POST",
         headers: {
@@ -53,11 +51,6 @@ export default function Home() {
         },
         body: JSON.stringify({ image }),
       });
-
-      if (response.status === 400) {
-        toast.error("image was not uploaded correctly");
-        return;
-      }
 
       if (!response.ok) {
         toast.error("Error analyzing image... Please try again.");
@@ -67,27 +60,34 @@ export default function Home() {
       const { ingredients }: { ingredients: IngredientsType } =
         await response.json();
 
-      if (!ingredients) return;
+      if (!ingredients || !Array.isArray(ingredients)) {
+        toast.error("No ingredients detected");
+        return;
+      }
 
       const embeddingResponse = await generateIngredientEmbedding(ingredients);
 
-      if (
-        !embeddingResponse ||
-        embeddingResponse.error ||
-        !embeddingResponse.embedding
-      )
+      if (!embeddingResponse || embeddingResponse.error) {
+        toast.error("Error generating embeddings");
         return;
-
-      const { embedding } = embeddingResponse;
-      if (embedding) {
-        const metadata = await getEmbeddingMetaData(embedding);
-        console.log("---- metadata ----", metadata);
       }
 
-      setShowResults(false);
+      const { embedding } = embeddingResponse;
+
+      console.log("---- embedding ----", embedding);
+
+      if (!embedding) return;
+
+      const metadata = await getEmbeddingMetaData(embedding);
+
+      if (!metadata) {
+        toast.error("No recipes found for these ingredients");
+        return;
+      }
+
+      setShowResults(true);
     } catch (error) {
       console.error("Error in handleGenerate:", error);
-
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -99,7 +99,16 @@ export default function Home() {
       <Header />
       <Toaster position="top-center" reverseOrder={false} />
 
-      {!showResults ? (
+      {showResults ? (
+        <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
+          <h1>Found Recipes</h1>
+          {/* {recipes.map((recipe, index) => (
+            <div key={index}>
+              <pre>{JSON.stringify(recipe, null, 2)}</pre>
+            </div>
+          ))} */}
+        </div>
+      ) : (
         <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
           <Hero />
           <ImageUploadSection
@@ -109,10 +118,6 @@ export default function Home() {
             handleImageUpload={handleImageUpload}
             handleGenerate={handleGenerate}
           />
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
-          <h1>Results</h1>
         </div>
       )}
       <Footer />
