@@ -1,4 +1,8 @@
-import { GenerateMealPlanProps, MealPlanResponse } from "@/types";
+import {
+  GenerateMealPlanProps,
+  HandleResetProps,
+  MealPlanResponse,
+} from "@/types";
 import { toast } from "react-hot-toast";
 import {
   GenerateHandlerProps,
@@ -9,12 +13,18 @@ import { getMealPlanPrompt } from "./prompts";
 
 /**
  * Generate an embedding for a list of ingredient names
-
  * @param ingredientNames
  * @returns
  */
 export const generateIngredientEmbedding = async (
-  ingredientNames: Array<{ category: string; name: string }>
+  ingredientNames: Array<{ category: string; name: string }>,
+  {
+    setIsMealPlanLoading,
+    setRecipes,
+    setShowResults,
+    setLoading,
+    setImage,
+  }: HandleResetProps
 ) => {
   try {
     const res = await fetch("/api/openai-embeddings", {
@@ -26,19 +36,53 @@ export const generateIngredientEmbedding = async (
     });
 
     if (!res.ok) {
-      return toast.error("Failed to generate embedding. Please try again.");
+      toast.error("Failed to generate embedding. Please try again.");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
+      return;
     }
 
     const { embedding }: { embedding: Array<number> } = await res.json();
 
-    if (!embedding) {
-      return toast.error("No embedding found");
+    if (
+      !embedding ||
+      !Array.isArray(embedding) ||
+      embedding.length === 0 ||
+      "error" in embedding
+    ) {
+      toast.error("No embedding found");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
+      return;
     }
 
     return embedding;
   } catch (error) {
     console.error(error);
-    return toast.error("An unexpected error occurred. Please try again.");
+    toast.error("An unexpected error occurred. Please try again.");
+    setTimeout(() => {
+      handleReset({
+        setIsMealPlanLoading,
+        setRecipes,
+        setShowResults,
+        setLoading,
+        setImage,
+      });
+    }, 3000);
   }
 };
 
@@ -47,7 +91,16 @@ export const generateIngredientEmbedding = async (
  * @param queryVector
  * @returns
  */
-export const getEmbeddingMetaData = async (queryVector: Array<number>) => {
+export const getEmbeddingMetaData = async (
+  queryVector: Array<number>,
+  {
+    setIsMealPlanLoading,
+    setRecipes,
+    setShowResults,
+    setLoading,
+    setImage,
+  }: HandleResetProps
+) => {
   try {
     const res = await fetch("/api/pinecone-embeddings", {
       method: "POST",
@@ -58,18 +111,48 @@ export const getEmbeddingMetaData = async (queryVector: Array<number>) => {
     });
 
     if (!res.ok) {
-      return toast.error("Failed to get metadata. Please try again.");
+      toast.error("Failed to get metadata. Please try again.");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
+      return;
     }
 
     const { metadata } = await res.json();
 
     if (!metadata) {
+      toast.error("No metadata found");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
       return { error: "No metadata found" };
     }
 
     return metadata;
   } catch (error) {
     console.error(error);
+    toast.error("An unexpected error occurred. Please try again.");
+    setTimeout(() => {
+      handleReset({
+        setIsMealPlanLoading,
+        setRecipes,
+        setShowResults,
+        setLoading,
+        setImage,
+      });
+    }, 3000);
   }
 };
 
@@ -77,11 +160,17 @@ export const generateMealPlan = async ({
   setIsMealPlanLoading,
   setRecipes,
   prompt,
-}: GenerateMealPlanProps) => {
+  setShowResults,
+  setLoading,
+  setImage,
+}: GenerateMealPlanProps & {
+  setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setImage: React.Dispatch<React.SetStateAction<string | null>>;
+}) => {
   try {
     setIsMealPlanLoading(true);
 
-    // Fetch meal plan from AI
     const res = await fetch("/api/generate-meal-plan", {
       method: "POST",
       headers: {
@@ -93,31 +182,50 @@ export const generateMealPlan = async ({
     if (!res.ok) {
       setIsMealPlanLoading(false);
       toast.error("Failed to generate meal plan. Please try again.");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
       return { error: "Failed to generate meal plan" };
     }
 
     const response = await res.json();
-
-    /**
-     * Extract mealPlan from the response
-     * and assign a type to it for type safety and to understand the structure of the data
-     */
     const { mealPlan }: { mealPlan: MealPlanResponse["recipes"] } = response;
 
     if (!mealPlan) {
       setIsMealPlanLoading(false);
       toast.error("No meal plan found. Please try again.");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
       return { error: "No meal plan found" };
     }
 
-    console.log("---- mealPlan ----", mealPlan);
-
-    // Set the final recipes with images
-    setRecipes(mealPlan);
     setIsMealPlanLoading(false);
+    setRecipes(mealPlan);
   } catch (error) {
     console.error("Error generating meal plan:", error);
     toast.error("An unexpected error occurred. Please try again.");
+    setTimeout(() => {
+      handleReset({
+        setIsMealPlanLoading,
+        setRecipes,
+        setShowResults,
+        setLoading,
+        setImage,
+      });
+    }, 3000);
     setIsMealPlanLoading(false);
   } finally {
     setIsMealPlanLoading(false);
@@ -130,10 +238,22 @@ export const handleGenerate = async ({
   setShowResults,
   setIsMealPlanLoading,
   setRecipes,
-}: GenerateHandlerProps) => {
+  setImage,
+}: GenerateHandlerProps & {
+  setImage: React.Dispatch<React.SetStateAction<string | null>>;
+}) => {
   try {
     if (!image) {
       toast.error("Please upload an image");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
       return;
     }
     setLoading(true);
@@ -148,6 +268,15 @@ export const handleGenerate = async ({
 
     if (!response.ok) {
       toast.error("Error analyzing image... Please try again.");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
       return;
     }
 
@@ -156,27 +285,63 @@ export const handleGenerate = async ({
 
     if (!ingredients || !Array.isArray(ingredients)) {
       toast.error("No ingredients detected");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
       return;
     }
 
     setLoading(false);
     setShowResults(true);
 
-    const embedding = await generateIngredientEmbedding(ingredients);
+    const embedding = await generateIngredientEmbedding(ingredients, {
+      setIsMealPlanLoading,
+      setRecipes,
+      setShowResults,
+      setLoading,
+      setImage,
+    });
 
-    if (typeof embedding === "string" || "error" in embedding) {
+    if (typeof embedding === "string" || embedding === undefined) {
       toast.error(
         "Error generating embeddings. Embedding is a string or there is an error"
       );
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
       return;
     }
 
-    const metadata: MetaDataResponse = await getEmbeddingMetaData(embedding);
+    const metadata: MetaDataResponse = await getEmbeddingMetaData(embedding, {
+      setIsMealPlanLoading,
+      setRecipes,
+      setShowResults,
+      setLoading,
+      setImage,
+    });
 
     if (!metadata) {
       toast.error("No recipes found for these ingredients. Please try again");
       setTimeout(() => {
-        setShowResults(false);
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
       }, 3000);
       return;
     }
@@ -187,9 +352,39 @@ export const handleGenerate = async ({
       setIsMealPlanLoading,
       setRecipes,
       prompt,
+      setShowResults,
+      setLoading,
+      setImage,
     });
   } catch (error) {
     console.error("Error in handleGenerate:", error);
     toast.error("An unexpected error occurred. Please try again.");
+    setTimeout(() => {
+      handleReset({
+        setIsMealPlanLoading,
+        setRecipes,
+        setShowResults,
+        setLoading,
+        setImage,
+      });
+    }, 3000);
   }
+};
+
+/**
+ * Function to reset the page page to normal after errors
+ */
+
+export const handleReset = ({
+  setIsMealPlanLoading,
+  setRecipes,
+  setShowResults,
+  setLoading,
+  setImage,
+}: HandleResetProps) => {
+  setIsMealPlanLoading(false);
+  setRecipes([]);
+  setShowResults(false);
+  setLoading(false);
+  setImage(null);
 };
