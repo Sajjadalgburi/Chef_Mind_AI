@@ -6,11 +6,19 @@ import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
 export async function POST(request: Request) {
   try {
+    // Make sure to check if the API key is set
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { error: "OpenAI API key is not set" },
+        { status: 500 }
+      );
+    }
+
     // ! Make sure to make the recipe food type or interface
     const { recipeDescription } = await request.json();
 
@@ -21,9 +29,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const mainPrompt: string = `
+You are a chef. You are given a recipe description. You need to generate an image for the recipe.
+
+Recipe Description:
+${recipeDescription}
+`;
+
     const response = await openai.images.generate({
       model: "dall-e-3",
-      prompt: recipeDescription,
+      prompt: mainPrompt,
       n: 1,
       size: "1024x1024",
     });
