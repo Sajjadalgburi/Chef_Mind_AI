@@ -60,3 +60,11 @@ export interface GenerateHandlerProps {
   setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
 }
+
+export type HandleResetProps = {
+  setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
+  setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setImage: React.Dispatch<React.SetStateAction<string | null>>;
+};
