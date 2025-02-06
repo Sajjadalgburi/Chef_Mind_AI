@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { handleGenerate } from "@/helpers";
-import MealCards from "@/components/MealCards";
+import MealCards from "@/components/Meal-Card/MealCards";
 import { MealPlanResponse } from "@/types";
 
 /**
