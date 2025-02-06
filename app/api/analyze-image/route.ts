@@ -1,3 +1,4 @@
+import { IngredientsType } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { OpenAI } from "openai";
 
@@ -32,14 +33,6 @@ IMPORTANT:
 - IF YOU CANNOT DETECT ANY INGREDIENTS OR IMAGE IS NOT CLEAR, RETURN AN EMPTY ARRAY
 `;
 
-export type IngredientsType = [
-  {
-    category: string;
-    name: string;
-    quantity: string;
-  }
-];
-
 export async function POST(
   req: NextRequest
 ): Promise<IngredientsType | NextResponse> {
@@ -53,7 +46,6 @@ export async function POST(
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-
       messages: [
         {
           role: "user",
