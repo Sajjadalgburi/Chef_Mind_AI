@@ -6,9 +6,10 @@ import { Clock, Users, ChefHat, Utensils } from "lucide-react";
 
 type Props = {
   recipes: MealPlanResponse["recipes"];
+  mealPlanImage: string | null;
 };
 
-const MealCardBody: React.FC<Props> = ({ recipes }) => {
+const MealCardBody: React.FC<Props> = ({ recipes, mealPlanImage }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
       {recipes.map(
@@ -31,7 +32,7 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
           >
             <div className="relative h-48 w-full">
               <Image
-                src={`/images/meal-${(index % 10) + 1}.jpg`}
+                src={mealPlanImage as string}
                 alt={title}
                 className="w-full h-full object-cover"
                 width={400}
