@@ -22,8 +22,33 @@ export type Recipe = {
 
 // Type definition for the properties required to generate a meal plan
 export type GenerateMealPlanProps = {
-  setMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setRecipes: React.Dispatch<React.SetStateAction<Recipe[]>>;
-  ingredients: IngredientsType;
-  metadata: MetaDataResponse;
+  setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
+  prompt: string;
+};
+
+export type MealPlanResponse = {
+  recipes: Array<{
+    title: string;
+    cuisine: string;
+    difficulty: string;
+    prepTime: string;
+    cookTime: string;
+    servings: string;
+    ingredients: Array<{
+      item: string;
+      amount: string;
+      required: boolean;
+      substitute?: string;
+    }>;
+    instructions: string[];
+    nutritionalInfo: {
+      calories: string;
+      protein: string;
+      carbs: string;
+      fat: string;
+    };
+    imagePrompt: string;
+    tips: string[];
+  }>;
 };
