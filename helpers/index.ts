@@ -1,4 +1,5 @@
 import { GenerateMealPlanProps, MealPlanResponse } from "@/types";
+import { toast } from "react-hot-toast";
 
 /**
  * Generate an embedding for a list of ingredient names
@@ -18,15 +19,20 @@ export const generateIngredientEmbedding = async (
       body: JSON.stringify({ ingredients: ingredientNames }),
     });
 
+    if (!res.ok) {
+      return toast.error("Failed to generate embedding. Please try again.");
+    }
+
     const { embedding }: { embedding: Array<number> } = await res.json();
 
     if (!embedding) {
       return { error: "No embedding found" };
     }
 
-    return { embedding };
+    return embedding;
   } catch (error) {
     console.error(error);
+    return toast.error("An unexpected error occurred. Please try again.");
   }
 };
 
@@ -44,6 +50,10 @@ export const getEmbeddingMetaData = async (queryVector: Array<number>) => {
       },
       body: JSON.stringify({ queryVector }),
     });
+
+    if (!res.ok) {
+      return toast.error("Failed to get metadata. Please try again.");
+    }
 
     const { metadata } = await res.json();
 
@@ -66,13 +76,19 @@ export const generateMealPlan = async ({
     setIsMealPlanLoading(true);
 
     // Fetch meal plan from AI
-    const res = await fetch("/api/chat", {
+    const res = await fetch("/api/generate-meal-plan", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ prompt }),
     });
+
+    if (!res.ok) {
+      setIsMealPlanLoading(false);
+      toast.error("Failed to generate meal plan. Please try again.");
+      return { error: "Failed to generate meal plan" };
+    }
 
     const response = await res.json();
 
@@ -84,6 +100,7 @@ export const generateMealPlan = async ({
 
     if (!mealPlan) {
       setIsMealPlanLoading(false);
+      toast.error("No meal plan found. Please try again.");
       return { error: "No meal plan found" };
     }
 
@@ -94,6 +111,8 @@ export const generateMealPlan = async ({
     setIsMealPlanLoading(false);
   } catch (error) {
     console.error("Error generating meal plan:", error);
+    toast.error("An unexpected error occurred. Please try again.");
+    setIsMealPlanLoading(false);
   } finally {
     setIsMealPlanLoading(false);
   }
