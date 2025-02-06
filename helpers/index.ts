@@ -163,10 +163,12 @@ export const generateMealPlan = async ({
   setShowResults,
   setLoading,
   setImage,
+  setMealPlanImage,
 }: GenerateMealPlanProps & {
   setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setImage: React.Dispatch<React.SetStateAction<string | null>>;
+  setMealPlanImage: React.Dispatch<React.SetStateAction<string | null>>;
 }) => {
   try {
     setIsMealPlanLoading(true);
@@ -197,8 +199,11 @@ export const generateMealPlan = async ({
     const response = await res.json();
     const { mealPlan }: { mealPlan: MealPlanResponse["recipes"] } = response;
 
+    const imagePrompt = mealPlan[0].imagePrompt;
+
     if (!mealPlan) {
       setIsMealPlanLoading(false);
+
       toast.error("No meal plan found. Please try again.");
       setTimeout(() => {
         handleReset({
@@ -211,12 +216,71 @@ export const generateMealPlan = async ({
       }, 3000);
       return { error: "No meal plan found" };
     }
+    if (!imagePrompt) {
+      toast.error("No image prompt found");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
+      return { error: "No image prompt found" };
+    }
+
+    const imageRes = await fetch("/api/generate-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imagePrompt }),
+    });
+
+    if (!imageRes.ok) {
+      toast.error("Failed to generate image. Please try again.");
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
+
+      return { error: "Failed to generate image" };
+    }
+
+    const { imageUrl }: { imageUrl: string } = await imageRes.json();
+
+    console.log("GOT BACK DALLE IMAGE", imageUrl);
+
+    if (!imageUrl) {
+      toast.error("No image URL found");
+
+      setTimeout(() => {
+        handleReset({
+          setIsMealPlanLoading,
+          setRecipes,
+          setShowResults,
+          setLoading,
+          setImage,
+        });
+      }, 3000);
+      return { error: "No image URL found" };
+    }
 
     setIsMealPlanLoading(false);
     setRecipes(mealPlan);
+    setShowResults(true);
+    setLoading(false);
+    setMealPlanImage(imageUrl);
   } catch (error) {
     console.error("Error generating meal plan:", error);
     toast.error("An unexpected error occurred. Please try again.");
+
     setTimeout(() => {
       handleReset({
         setIsMealPlanLoading,
@@ -239,6 +303,7 @@ export const handleGenerate = async ({
   setIsMealPlanLoading,
   setRecipes,
   setImage,
+  setMealPlanImage,
 }: GenerateHandlerProps & {
   setImage: React.Dispatch<React.SetStateAction<string | null>>;
 }) => {
@@ -355,9 +420,11 @@ export const handleGenerate = async ({
       setShowResults,
       setLoading,
       setImage,
+      setMealPlanImage,
     });
   } catch (error) {
     console.error("Error in handleGenerate:", error);
+
     toast.error("An unexpected error occurred. Please try again.");
     setTimeout(() => {
       handleReset({
