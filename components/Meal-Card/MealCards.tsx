@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { MealPlanResponse } from "@/types";
+import { MealCardsProps } from "@/types";
 import MealCardBody from "./MealCardBody";
 import { LoadingCard } from "./LoadingCard";
-type Props = {
-  isMealPlanLoading: boolean;
-  recipes: MealPlanResponse["recipes"];
-};
 
-const MealCards: React.FC<Props> = ({ isMealPlanLoading, recipes }) => {
+const MealCards: React.FC<MealCardsProps> = ({
+  isMealPlanLoading,
+  recipes,
+  mealPlanImage,
+}) => {
   const [visibleSkeletons, setVisibleSkeletons] = useState(1);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const MealCards: React.FC<Props> = ({ isMealPlanLoading, recipes }) => {
           Your Personalized Meal Plan
         </h1>
 
-        <MealCardBody recipes={recipes} />
+        <MealCardBody recipes={recipes} mealPlanImage={mealPlanImage} />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {Array.from({ length: visibleSkeletons }).map((_, index) => (
             <LoadingCard key={index} />
@@ -38,10 +38,12 @@ const MealCards: React.FC<Props> = ({ isMealPlanLoading, recipes }) => {
       </div>
     </div>
   ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-      {Array.from({ length: visibleSkeletons }).map((_, index) => (
-        <LoadingCard key={index} />
-      ))}
+    <div className="gap-8 mx-auto px-4 w-full mb-[5rem] sm:mb-0 py-6 sm:py-[5rem] flex flex-col items-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+        {Array.from({ length: visibleSkeletons }).map((_, index) => (
+          <LoadingCard key={index} />
+        ))}
+      </div>
     </div>
   );
 };
