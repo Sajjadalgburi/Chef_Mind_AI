@@ -6,13 +6,27 @@ import ImageUploadSection from "../components/ImageUploadSection";
 import Footer from "../components/Footer";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { IngredientsType } from "./api/analyze-image/route";
-import { generateIngredientEmbedding, getEmbeddingMetaData } from "@/helpers";
+import {
+  generateIngredientEmbedding,
+  generateMealPlan,
+  getEmbeddingMetaData,
+} from "@/helpers";
+import MealCards from "@/components/MealCards";
+import { IngredientsType, MealPlanResponse, MetaDataResponse } from "@/types";
+import { getMealPlanPrompt } from "@/helpers/prompts";
+
+/**
+ * Description: This is the main component for the home page. It contains the image upload section, the meal cards, and the footer.
+ * @returns JSX.Element
+ */
 
 export default function Home() {
   const [image, setImage] = useState<string | null>(null);
+
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
+  const [recipes, setRecipes] = useState<MealPlanResponse["recipes"]>([]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -36,13 +50,12 @@ export default function Home() {
   };
 
   const handleGenerate = async () => {
-    setLoading(true);
-
     try {
       if (!image) {
         toast.error("Please upload an image");
         return;
       }
+      setLoading(true);
 
       const response = await fetch("/api/analyze-image", {
         method: "POST",
@@ -65,52 +78,61 @@ export default function Home() {
         return;
       }
 
-      const embeddingResponse = await generateIngredientEmbedding(ingredients);
+      setLoading(false);
+      setShowResults(true);
 
-      if (!embeddingResponse || embeddingResponse.error) {
+      const embedding = await generateIngredientEmbedding(ingredients);
+
+      // if the embedding is an error, return
+      if (typeof embedding === "string" || "error" in embedding) {
         toast.error("Error generating embeddings");
         return;
       }
 
-      const { embedding } = embeddingResponse;
-
-      console.log("---- embedding ----", embedding);
-
-      if (!embedding) return;
-
-      const metadata = await getEmbeddingMetaData(embedding);
+      // grabbing the metadata from pinecone database
+      const metadata: MetaDataResponse = await getEmbeddingMetaData(embedding);
 
       if (!metadata) {
-        toast.error("No recipes found for these ingredients");
+        toast.error("No recipes found for these ingredients. Please try again");
+        setTimeout(() => {
+          setShowResults(false);
+        }, 3000);
         return;
       }
 
-      setShowResults(true);
+      const prompt = getMealPlanPrompt(
+        metadata,
+        ingredients as IngredientsType
+      );
+
+      await generateMealPlan({
+        setIsMealPlanLoading,
+        setRecipes,
+        prompt,
+      });
     } catch (error) {
       console.error("Error in handleGenerate:", error);
+
       toast.error("An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen max-w-4xl flex flex-col justify-between items-center mx-auto bg-gradient-to-b">
-      <Header />
-      <Toaster position="top-center" reverseOrder={false} />
+    <main className="min-h-screen flex flex-col justify-between items-center mx-auto bg-gradient-to-b">
+      <div className="w-full max-w-4xl">
+        <Header />
+        <Toaster position="top-center" reverseOrder={false} />
+      </div>
 
       {showResults ? (
-        <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
-          <h1>Found Recipes</h1>
-          {/* {recipes.map((recipe, index) => (
-            <div key={index}>
-              <pre>{JSON.stringify(recipe, null, 2)}</pre>
-            </div>
-          ))} */}
-        </div>
+        <MealCards
+          isMealPlanLoading={isMealPlanLoading}
+          recipes={recipes as MealPlanResponse["recipes"]}
+        />
       ) : (
         <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
           <Hero />
+
           <ImageUploadSection
             setImage={setImage}
             image={image}
