@@ -13,6 +13,12 @@ export type IngredientsType = [
   }
 ];
 
+export type MealCardsProps = {
+  isMealPlanLoading: boolean;
+  recipes: MealPlanResponse["recipes"];
+  mealPlanImage: string | null;
+};
+
 // Type definition for a recipe
 export type Recipe = {
   title: string;
@@ -25,6 +31,7 @@ export type GenerateMealPlanProps = {
   setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
   prompt: string;
+  setMealPlanImage: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 export type MealPlanResponse = {
@@ -48,6 +55,7 @@ export type MealPlanResponse = {
       carbs: string;
       fat: string;
     };
+    imageUrl?: string;
     imagePrompt: string;
     tips: string[];
   }>;
@@ -59,6 +67,7 @@ export interface GenerateHandlerProps {
   setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
   setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
+  setMealPlanImage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export type HandleResetProps = {
