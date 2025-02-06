@@ -19,12 +19,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // ! Make sure to make the recipe food type or interface
-    const { recipeDescription } = await request.json();
+    console.log("---- Generating Image Route ----");
 
-    if (!recipeDescription) {
+    // ! Make sure to make the recipe food type or interface
+    const { imagePrompt } = await request.json();
+
+    if (!imagePrompt) {
       return NextResponse.json(
-        { error: "No recipe description provided" },
+        { error: "No image prompt provided" },
         { status: 400 }
       );
     }
@@ -33,7 +35,7 @@ export async function POST(request: Request) {
 You are a chef. You are given a recipe description. You need to generate an image for the recipe.
 
 Recipe Description:
-${recipeDescription}
+${imagePrompt}
 `;
 
     const response = await openai.images.generate({
