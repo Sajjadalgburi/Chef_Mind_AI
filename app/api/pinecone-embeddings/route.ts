@@ -22,11 +22,7 @@ export async function POST(req: NextRequest) {
       includeMetadata: true,
     });
 
-    console.log("---- results ----", results);
-
     const metadata = results.matches.map((match) => match.metadata);
-
-    console.log("---- metadata ----", metadata);
 
     return NextResponse.json({ metadata }, { status: 200 });
   } catch (error) {
