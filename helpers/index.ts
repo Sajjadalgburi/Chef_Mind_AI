@@ -1,7 +1,8 @@
-import { GenerateMealPlanProps } from "@/types";
+import { GenerateMealPlanProps, MealPlanResponse } from "@/types";
 
 /**
  * Generate an embedding for a list of ingredient names
+
  * @param ingredientNames
  * @returns
  */
@@ -56,37 +57,44 @@ export const getEmbeddingMetaData = async (queryVector: Array<number>) => {
   }
 };
 
-/**
- * Generate a meal plan based on the ingredients
- * @param param0
- * @returns
- */
 export const generateMealPlan = async ({
-  setMealPlanLoading,
+  setIsMealPlanLoading,
   setRecipes,
-  ingredients,
-  metadata,
+  prompt,
 }: GenerateMealPlanProps) => {
   try {
-    setMealPlanLoading(true);
+    setIsMealPlanLoading(true);
 
+    // Fetch meal plan from AI
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ingredients }),
+      body: JSON.stringify({ prompt }),
     });
 
-    const { AiMealPlan } = await res.json();
+    const response = await res.json();
 
-    if (!AiMealPlan) {
+    /**
+     * Extract mealPlan from the response
+     * and assign a type to it for type safety and to understand the structure of the data
+     */
+    const { mealPlan }: { mealPlan: MealPlanResponse["recipes"] } = response;
+
+    if (!mealPlan) {
+      setIsMealPlanLoading(false);
       return { error: "No meal plan found" };
     }
 
-    setRecipes(AiMealPlan);
-    setMealPlanLoading(false);
+    console.log("---- mealPlan ----", mealPlan);
+
+    // Set the final recipes with images
+    setRecipes(mealPlan);
+    setIsMealPlanLoading(false);
   } catch (error) {
-    console.error(error);
+    console.error("Error generating meal plan:", error);
+  } finally {
+    setIsMealPlanLoading(false);
   }
 };
