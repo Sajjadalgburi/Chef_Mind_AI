@@ -52,3 +52,11 @@ export type MealPlanResponse = {
     tips: string[];
   }>;
 };
+
+export interface GenerateHandlerProps {
+  image: string;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
+}
