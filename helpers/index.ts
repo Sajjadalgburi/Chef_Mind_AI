@@ -1,5 +1,11 @@
 import { GenerateMealPlanProps, MealPlanResponse } from "@/types";
 import { toast } from "react-hot-toast";
+import {
+  GenerateHandlerProps,
+  IngredientsType,
+  MetaDataResponse,
+} from "@/types";
+import { getMealPlanPrompt } from "./prompts";
 
 /**
  * Generate an embedding for a list of ingredient names
@@ -26,7 +32,7 @@ export const generateIngredientEmbedding = async (
     const { embedding }: { embedding: Array<number> } = await res.json();
 
     if (!embedding) {
-      return { error: "No embedding found" };
+      return toast.error("No embedding found");
     }
 
     return embedding;
@@ -115,5 +121,75 @@ export const generateMealPlan = async ({
     setIsMealPlanLoading(false);
   } finally {
     setIsMealPlanLoading(false);
+  }
+};
+
+export const handleGenerate = async ({
+  image,
+  setLoading,
+  setShowResults,
+  setIsMealPlanLoading,
+  setRecipes,
+}: GenerateHandlerProps) => {
+  try {
+    if (!image) {
+      toast.error("Please upload an image");
+      return;
+    }
+    setLoading(true);
+
+    const response = await fetch("/api/analyze-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ image }),
+    });
+
+    if (!response.ok) {
+      toast.error("Error analyzing image... Please try again.");
+      return;
+    }
+
+    const { ingredients }: { ingredients: IngredientsType } =
+      await response.json();
+
+    if (!ingredients || !Array.isArray(ingredients)) {
+      toast.error("No ingredients detected");
+      return;
+    }
+
+    setLoading(false);
+    setShowResults(true);
+
+    const embedding = await generateIngredientEmbedding(ingredients);
+
+    if (typeof embedding === "string" || "error" in embedding) {
+      toast.error(
+        "Error generating embeddings. Embedding is a string or there is an error"
+      );
+      return;
+    }
+
+    const metadata: MetaDataResponse = await getEmbeddingMetaData(embedding);
+
+    if (!metadata) {
+      toast.error("No recipes found for these ingredients. Please try again");
+      setTimeout(() => {
+        setShowResults(false);
+      }, 3000);
+      return;
+    }
+
+    const prompt = getMealPlanPrompt(metadata, ingredients as IngredientsType);
+
+    await generateMealPlan({
+      setIsMealPlanLoading,
+      setRecipes,
+      prompt,
+    });
+  } catch (error) {
+    console.error("Error in handleGenerate:", error);
+    toast.error("An unexpected error occurred. Please try again.");
   }
 };
