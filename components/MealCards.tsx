@@ -1,74 +1,143 @@
 import React from "react";
 import Image from "next/image";
+import { MealPlanResponse } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Users, ChefHat, Utensils } from "lucide-react";
 
-const MealCards = () => {
-  return (
+type Props = {
+  isMealPlanLoading: boolean;
+  recipes: MealPlanResponse["recipes"];
+};
+
+const MealCards: React.FC<Props> = ({ isMealPlanLoading, recipes }) => {
+  return !isMealPlanLoading ? (
     <div className="gap-8 mx-auto px-4 w-full mb-[5rem] sm:mb-0 py-6 sm:py-[5rem] flex flex-col items-center">
       <div className="w-full max-w-7xl">
         <h1 className="md:text-6xl text-left mb-8 font-bold text-gray-800">
-          Your Meal Plan:
+          Your Personalized Meal Plan
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {Array(10)
-            .fill(null)
-            .map((_, index) => (
+          {recipes.map(
+            (
+              {
+                title,
+                cuisine,
+                difficulty,
+                prepTime,
+                cookTime,
+                servings,
+                ingredients,
+                nutritionalInfo,
+              },
+              index
+            ) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100"
               >
                 <div className="relative h-48 w-full">
                   <Image
-                    // src={`https://picsum.photos/seed/${index}/400/300`}
-                    src={`/images/meal-${index + 1}.jpg`}
-                    alt="Recipe"
+                    src={`/images/meal-${(index % 10) + 1}.jpg`}
+                    alt={title}
                     className="w-full h-full object-cover"
                     width={400}
                     height={300}
                   />
-                  <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-sm">
-                    Meal {index + 1}
+                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/10 to-black/60" />
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="bg-white/90 backdrop-blur-sm"
+                    >
+                      {cuisine}
+                    </Badge>
+                    <Badge className="bg-green-500">{difficulty}</Badge>
                   </div>
                 </div>
 
-                <div className="p-4">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    Seven Layer Salad
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                    {title}
                   </h3>
 
+                  <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>Prep: {prepTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Utensils className="h-4 w-4" />
+                      <span>Cook: {cookTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      <span>{servings}</span>
+                    </div>
+                  </div>
+
                   <div className="mb-4">
-                    <h4 className="font-medium text-gray-700 mb-2">
-                      Ingredients:
+                    <h4 className="font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <ChefHat className="h-4 w-4" />
+                      Main Ingredients
                     </h4>
-                    <ul className="text-sm text-gray-600 list-disc pl-4">
-                      <li>1 head shredded lettuce</li>
-                      <li>1 c. chopped diced celery</li>
-                      <li>1 c. chopped onion</li>
-                      {/* Show only first 3 ingredients */}
-                      <li className="text-gray-500 italic">
-                        +5 more ingredients
-                      </li>
-                    </ul>
+                    <div className="flex flex-wrap gap-2">
+                      {ingredients.slice(0, 4).map((ing, idx) => (
+                        <Badge
+                          key={idx}
+                          variant={ing.required ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {ing.item}
+                        </Badge>
+                      ))}
+                      {ingredients.length > 4 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{ingredients.length - 4} more
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
-                  <div>
-                    <h4 className="font-medium text-gray-700 mb-2">
-                      Directions:
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Place peas in boiling water and boil 1 minute, drain and
-                      cool.
-                    </p>
+                  <div className="flex flex-wrap gap-3 text-sm mb-4">
+                    <div className="flex flex-col">
+                      <span className="text-gray-600">Calories</span>
+                      <span className="font-medium">
+                        {nutritionalInfo.calories}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <span className="text-gray-600">Protein</span>
+                      <span className="font-medium">
+                        {nutritionalInfo.protein}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <span className="text-gray-600">Carbs</span>
+                      <span className="font-medium">
+                        {nutritionalInfo.carbs}
+                      </span>
+                    </div>
                   </div>
 
-                  <button className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors duration-200">
+                  <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium">
                     View Full Recipe
                   </button>
                 </div>
               </div>
-            ))}
+            )
+          )}
         </div>
       </div>
+    </div>
+  ) : (
+    <div className="flex flex-col items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-500 mb-4" />
+      <h1 className="text-2xl font-medium text-gray-800">
+        Crafting your meal plan...
+      </h1>
     </div>
   );
 };
