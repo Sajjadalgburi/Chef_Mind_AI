@@ -21,7 +21,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
   const [recipes, setRecipes] = useState<MealPlanResponse["recipes"]>([]);
-
+  const [mealPlanImage, setMealPlanImage] = useState<string | null>(null);
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -51,6 +51,7 @@ export default function Home() {
       setIsMealPlanLoading,
       setRecipes,
       setImage,
+      setMealPlanImage,
     });
   };
 
@@ -65,6 +66,7 @@ export default function Home() {
         <MealCards
           isMealPlanLoading={isMealPlanLoading}
           recipes={recipes as MealPlanResponse["recipes"]}
+          mealPlanImage={mealPlanImage}
         />
       ) : (
         <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
