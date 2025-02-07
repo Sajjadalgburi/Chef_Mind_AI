@@ -48,7 +48,17 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
                 >
                   {cuisine}
                 </Badge>
-                <Badge className="bg-green-500">{difficulty}</Badge>
+                <Badge
+                  className={`${
+                    difficulty === "Easy"
+                      ? "bg-green-500"
+                      : difficulty === "Medium"
+                      ? "bg-yellow-500"
+                      : "bg-red-500"
+                  }`}
+                >
+                  {difficulty}
+                </Badge>
               </div>
             </div>
 
@@ -114,9 +124,14 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
                 </div>
               </div>
             </div>
-            <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium">
-              <Link href={source}>View Full Recipe</Link>
-            </button>
+            <Link
+              href={source.startsWith("http") ? source : `https://${source}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium"
+            >
+              View Full Recipe
+            </Link>
           </div>
         )
       )}
