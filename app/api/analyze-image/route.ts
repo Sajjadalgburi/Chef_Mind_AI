@@ -1,4 +1,3 @@
-import { IngredientsType } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { OpenAI } from "openai";
 
@@ -33,9 +32,7 @@ IMPORTANT:
 - IF YOU CANNOT DETECT ANY INGREDIENTS OR IMAGE IS NOT CLEAR, RETURN AN EMPTY ARRAY
 `;
 
-export async function POST(
-  req: NextRequest
-): Promise<IngredientsType | NextResponse> {
+export async function POST(req: NextRequest) {
   try {
     const { image } = await req.json();
 
