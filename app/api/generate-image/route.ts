@@ -21,8 +21,11 @@ export async function POST(request: Request) {
 
     console.log("---- Generating Image Route ----");
 
-    // ! Make sure to make the recipe food type or interface
-    const { imagePrompt } = await request.json();
+    const {
+      imagePrompt,
+    }: {
+      imagePrompt: string;
+    } = await request.json();
 
     if (!imagePrompt) {
       return NextResponse.json(
@@ -32,10 +35,19 @@ export async function POST(request: Request) {
     }
 
     const mainPrompt: string = `
-You are a chef. You are given a recipe description. You need to generate an image for the recipe.
+You are a highly skilled food photographer and chef. Your task is to generate a realistic and visually appealing image of the dish based on the following recipe description. Ensure that the presentation is professional, with vibrant colors, perfect lighting, and an appetizing composition.
 
-Recipe Description:
+Recipe Details:
 ${imagePrompt}
+
+Consider the following aspects:
+- The ingredients and their textures
+- The plating and presentation style
+- The background setting (e.g., rustic, modern, minimalistic)
+- The lighting (natural, warm, moody, etc.)
+- The garnishes and final touches that enhance appeal
+
+Generate a high-quality, mouthwatering image that looks as if it were taken for a gourmet food magazine or a high-end restaurant menu.
 `;
 
     const response = await openai.images.generate({
