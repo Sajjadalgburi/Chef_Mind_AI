@@ -2,7 +2,8 @@ import { MealPlanResponse } from "@/types";
 import React from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, ChefHat, Utensils, Link } from "lucide-react";
+import { Clock, Users, ChefHat, Utensils } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   recipes: MealPlanResponse["recipes"];
@@ -10,7 +11,7 @@ type Props = {
 
 const MealCardBody: React.FC<Props> = ({ recipes }) => {
   return (
-    <div className="grid grid-cols-1  lg:grid-cols-3 gap-6 w-full">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
       {recipes.map(
         (
           {
