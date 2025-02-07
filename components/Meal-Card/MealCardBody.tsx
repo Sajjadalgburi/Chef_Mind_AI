@@ -1,41 +1,85 @@
 import { MealPlanResponse } from "@/types";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Users, ChefHat, Utensils } from "lucide-react";
 import Link from "next/link";
+import {
+  AiFillLike,
+  AiOutlineLike,
+  AiFillDislike,
+  AiOutlineDislike,
+} from "react-icons/ai";
 
 type Props = {
   recipes: MealPlanResponse["recipes"];
 };
 
 const MealCardBody: React.FC<Props> = ({ recipes }) => {
+  const [savedRecipes, setSavedRecipes] = useState<MealPlanResponse["recipes"]>(
+    []
+  );
+  const [dislikedRecipes, setDislikedRecipes] = useState<string[]>([]);
+
+  // Load disliked recipes from localStorage on mount
+  useEffect(() => {
+    const storedDisliked = localStorage.getItem("dislikedRecipes");
+    if (storedDisliked) {
+      setDislikedRecipes(JSON.parse(storedDisliked));
+    }
+  }, []);
+
+  const handleSave = (recipe: MealPlanResponse["recipes"][0]) => {
+    if (savedRecipes.some((r) => r.title === recipe.title)) {
+      setSavedRecipes(savedRecipes.filter((r) => r.title !== recipe.title));
+    } else {
+      setSavedRecipes([...savedRecipes, recipe]);
+      setDislikedRecipes(
+        dislikedRecipes.filter((title) => title !== recipe.title)
+      ); // Remove from disliked
+      localStorage.setItem(
+        "dislikedRecipes",
+        JSON.stringify(
+          dislikedRecipes.filter((title) => title !== recipe.title)
+        )
+      );
+    }
+  };
+
+  const handleDislike = (recipeTitle: string) => {
+    if (dislikedRecipes.includes(recipeTitle)) {
+      setDislikedRecipes(
+        dislikedRecipes.filter((title) => title !== recipeTitle)
+      );
+      localStorage.setItem(
+        "dislikedRecipes",
+        JSON.stringify(dislikedRecipes.filter((title) => title !== recipeTitle))
+      );
+    } else {
+      setDislikedRecipes([...dislikedRecipes, recipeTitle]);
+      localStorage.setItem(
+        "dislikedRecipes",
+        JSON.stringify([...dislikedRecipes, recipeTitle])
+      );
+      setSavedRecipes(savedRecipes.filter((r) => r.title !== recipeTitle)); // Remove from saved
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-      {recipes.map(
-        (
-          {
-            title,
-            cuisine,
-            difficulty,
-            prepTime,
-            cookTime,
-            servings,
-            ingredients,
-            nutritionalInfo,
-            imageUrl,
-            source,
-          },
-          index
-        ) => (
+      {recipes.map((recipe, index) => {
+        const isSaved = savedRecipes.some((r) => r.title === recipe.title);
+        const isDisliked = dislikedRecipes.includes(recipe.title);
+
+        return (
           <div
             key={index}
             className="bg-white flex flex-col justify-between gap-1 sm:gap-3 py-3 px-3 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100"
           >
             <div className="relative h-48 w-full rounded-lg overflow-hidden">
               <Image
-                src={imageUrl as string}
-                alt={title}
+                src={recipe.imageUrl as string}
+                alt={recipe.title}
                 className="w-full h-full object-cover"
                 width={400}
                 height={300}
@@ -46,39 +90,39 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
                   variant="secondary"
                   className="bg-white/90 backdrop-blur-sm"
                 >
-                  {cuisine}
+                  {recipe.cuisine}
                 </Badge>
                 <Badge
                   className={`${
-                    difficulty === "Easy"
+                    recipe.difficulty === "Easy"
                       ? "bg-green-500"
-                      : difficulty === "Medium"
+                      : recipe.difficulty === "Medium"
                       ? "bg-yellow-500"
                       : "bg-red-500"
                   }`}
                 >
-                  {difficulty}
+                  {recipe.difficulty}
                 </Badge>
               </div>
             </div>
 
             <div className="p-6">
               <h3 className="text-xl md:text-3xl font-semibold text-gray-800 mb-3">
-                {title}
+                {recipe.title}
               </h3>
 
               <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  <span>Prep: {prepTime}</span>
+                  <span>Prep: {recipe.prepTime}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Utensils className="h-4 w-4" />
-                  <span>Cook: {cookTime}</span>
+                  <span>Cook: {recipe.cookTime}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <span>{servings}</span>
+                  <span>{recipe.servings}</span>
                 </div>
               </div>
 
@@ -88,7 +132,7 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
                   Main Ingredients
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {ingredients.slice(0, 4).map((ing, idx) => (
+                  {recipe.ingredients.slice(0, 4).map((ing, idx) => (
                     <Badge
                       key={idx}
                       variant={ing.required ? "default" : "secondary"}
@@ -97,9 +141,9 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
                       {ing.item}
                     </Badge>
                   ))}
-                  {ingredients.length > 4 && (
+                  {recipe.ingredients.length > 4 && (
                     <Badge variant="outline" className="text-xs">
-                      +{ingredients.length - 4} more
+                      +{recipe.ingredients.length - 4} more
                     </Badge>
                   )}
                 </div>
@@ -109,23 +153,81 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
                 <div className="flex flex-col">
                   <span className="text-gray-600">Calories</span>
                   <span className="font-medium">
-                    {nutritionalInfo.calories}
+                    {recipe.nutritionalInfo.calories}
                   </span>
                 </div>
-
                 <div className="flex flex-col">
                   <span className="text-gray-600">Protein</span>
-                  <span className="font-medium">{nutritionalInfo.protein}</span>
+                  <span className="font-medium">
+                    {recipe.nutritionalInfo.protein}
+                  </span>
                 </div>
-
                 <div className="flex flex-col">
                   <span className="text-gray-600">Carbs</span>
-                  <span className="font-medium">{nutritionalInfo.carbs}</span>
+                  <span className="font-medium">
+                    {recipe.nutritionalInfo.carbs}
+                  </span>
                 </div>
               </div>
             </div>
+
+            {/* Like and Dislike system */}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleSave(recipe)}
+                  className={`flex gap-3 justify-center items-center p-2 ${
+                    isSaved ? "bg-blue-200" : "bg-blue-100"
+                  } rounded-lg shadow-md transform transition-all duration-200 hover:scale-105`}
+                >
+                  {isSaved ? (
+                    <>
+                      <AiFillLike className="h-6 w-6" />
+                      <span>
+                        <strong>Saved</strong>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <AiOutlineLike className="h-6 w-6" />
+                      <span>
+                        <strong>Save</strong>
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => handleDislike(recipe.title)}
+                  className={`flex gap-3 justify-center items-center p-2 ${
+                    isDisliked ? "bg-red-200" : "bg-red-100"
+                  } rounded-lg shadow-md transform transition-all duration-200 hover:scale-105`}
+                >
+                  {isDisliked ? (
+                    <>
+                      <AiFillDislike className="h-6 w-6" />
+                      <span>
+                        <strong>Disliked</strong>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <AiOutlineDislike className="h-6 w-6" />
+                      <span>
+                        <strong>Dislike</strong>
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
             <Link
-              href={source.startsWith("http") ? source : `https://${source}`}
+              href={
+                recipe.source.startsWith("http")
+                  ? recipe.source
+                  : `https://${recipe.source}`
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium"
@@ -133,8 +235,8 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
               View Full Recipe
             </Link>
           </div>
-        )
-      )}
+        );
+      })}
     </div>
   );
 };
