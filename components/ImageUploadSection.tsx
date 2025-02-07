@@ -34,13 +34,12 @@ const ImageUploadSection: React.FC<Props> = ({
                 width={1920}
                 height={1080}
               />
-              <Button
-                variant="default"
-                size="sm"
+              <button
+                className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors"
                 onClick={() => setImage(null)}
               >
                 Remove
-              </Button>
+              </button>
             </div>
           ) : (
             <label className="flex flex-col items-center justify-center h-[200px] sm:h-[250px] md:h-[300px] border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors">
