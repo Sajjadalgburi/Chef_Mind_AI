@@ -14,14 +14,13 @@ import { MealPlanResponse } from "@/types";
  * Description: This is the main component for the home page. It contains the image upload section, the meal cards, and the footer.
  * @returns JSX.Element
  */
-
 export default function Home() {
   const [image, setImage] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
   const [recipes, setRecipes] = useState<MealPlanResponse["recipes"]>([]);
-  const [mealPlanImage, setMealPlanImage] = useState<string | null>(null);
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -50,8 +49,6 @@ export default function Home() {
       setShowResults,
       setIsMealPlanLoading,
       setRecipes,
-      setImage,
-      setMealPlanImage,
     });
   };
 
@@ -66,11 +63,10 @@ export default function Home() {
         <MealCards
           isMealPlanLoading={isMealPlanLoading}
           recipes={recipes as MealPlanResponse["recipes"]}
-          mealPlanImage={mealPlanImage}
         />
       ) : (
         <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
-          <Hero />
+          <Hero image={image as string} />
 
           <ImageUploadSection
             setImage={setImage}
