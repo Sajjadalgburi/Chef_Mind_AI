@@ -71,8 +71,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("---- Extracted JSON ----", responseText);
-
     const ingredients = JSON.parse(responseText);
 
     console.log("---- Got Ingredients Back ----", ingredients);
