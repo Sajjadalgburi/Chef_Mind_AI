@@ -1,12 +1,51 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { ClerkMiddlewareAuth, clerkMiddleware } from "@clerk/nextjs/server";
+import { Redis } from "@upstash/redis";
+import { NextRequest, NextResponse } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
 
-export default clerkMiddleware();
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+const ratelimit = new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.slidingWindow(35, "86400 s"), // 25 requests per day
+  ephemeralCache: new Map(),
+  analytics: true,
+});
+
+const isAPI = (path: string) => {
+  return path.startsWith("/api/") || path.startsWith("/app/api/");
+};
+
+export default clerkMiddleware(
+  async (auth: ClerkMiddlewareAuth, request: NextRequest) => {
+    //Rate limit APIs
+    if (isAPI(request.nextUrl.pathname)) {
+      const { userId } = await auth();
+      const { success, limit, reset, remaining } = await ratelimit.limit(
+        `${userId}`
+      );
+
+      const res = success
+        ? NextResponse.next()
+        : NextResponse.json(
+            { errorMessage: "Rate limit exceeded. Please try again later." },
+            { status: 429 }
+          );
+
+      res.headers.set("X-RateLimit-Limit", limit.toString());
+      res.headers.set("X-RateLimit-Remaining", remaining.toString());
+      res.headers.set("X-RateLimit-Reset", reset.toString());
+
+      if (!success) return res;
+      return res;
+    }
+    return NextResponse.next();
+  }
+);
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
