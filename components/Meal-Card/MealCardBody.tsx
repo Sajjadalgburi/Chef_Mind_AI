@@ -23,27 +23,29 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
 
   // Load disliked recipes from localStorage on mount
   useEffect(() => {
-    const storedDisliked = localStorage.getItem("dislikedRecipes");
-    if (storedDisliked) {
-      setDislikedRecipes(JSON.parse(storedDisliked));
+    const storedSaved = localStorage.getItem("savedRecipes");
+    if (storedSaved) {
+      setSavedRecipes(JSON.parse(storedSaved));
     }
   }, []);
 
   const handleSave = (recipe: MealPlanResponse["recipes"][0]) => {
-    if (savedRecipes.some((r) => r.title === recipe.title)) {
-      setSavedRecipes(savedRecipes.filter((r) => r.title !== recipe.title));
-    } else {
-      setSavedRecipes([...savedRecipes, recipe]);
-      setDislikedRecipes(
-        dislikedRecipes.filter((title) => title !== recipe.title)
-      ); // Remove from disliked
-      localStorage.setItem(
-        "dislikedRecipes",
-        JSON.stringify(
-          dislikedRecipes.filter((title) => title !== recipe.title)
-        )
+    setSavedRecipes((prevSaved) => {
+      const updatedSaved = prevSaved.some((r) => r.title === recipe.title)
+        ? prevSaved.filter((r) => r.title !== recipe.title)
+        : [...prevSaved, recipe];
+
+      localStorage.setItem("savedRecipes", JSON.stringify(updatedSaved));
+      return updatedSaved;
+    });
+
+    setDislikedRecipes((prevDisliked) => {
+      const updatedDisliked = prevDisliked.filter(
+        (title) => title !== recipe.title
       );
-    }
+      localStorage.setItem("dislikedRecipes", JSON.stringify(updatedDisliked));
+      return updatedDisliked;
+    });
   };
 
   const handleDislike = (recipeTitle: string) => {
