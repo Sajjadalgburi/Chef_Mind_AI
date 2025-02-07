@@ -29,15 +29,19 @@ const Profile = () => {
 
   const handleSave = (recipe: MealPlanResponse["recipes"][0]) => {
     setSavedRecipes((prevSaved) => {
-      const updatedSaved = prevSaved.some((r) => r.title === recipe.title)
-        ? prevSaved.filter((r) => r.title !== recipe.title)
-        : [...prevSaved, recipe];
-
+      if (prevSaved.some((r) => r.title === recipe.title)) {
+        // If already saved, do nothing
+        return prevSaved;
+      }
+      const updatedSaved = [...prevSaved, recipe];
       localStorage.setItem("savedRecipes", JSON.stringify(updatedSaved));
       return updatedSaved;
     });
 
     setDislikedRecipes((prevDisliked) => {
+      if (!prevDisliked.includes(recipe.title)) {
+        return prevDisliked; // If not disliked, do nothing
+      }
       const updatedDisliked = prevDisliked.filter(
         (title) => title !== recipe.title
       );
@@ -47,22 +51,23 @@ const Profile = () => {
   };
 
   const handleDislike = (recipeTitle: string) => {
-    if (dislikedRecipes.includes(recipeTitle)) {
-      setDislikedRecipes(
-        dislikedRecipes.filter((title) => title !== recipeTitle)
-      );
-      localStorage.setItem(
-        "dislikedRecipes",
-        JSON.stringify(dislikedRecipes.filter((title) => title !== recipeTitle))
-      );
-    } else {
-      setDislikedRecipes([...dislikedRecipes, recipeTitle]);
-      localStorage.setItem(
-        "dislikedRecipes",
-        JSON.stringify([...dislikedRecipes, recipeTitle])
-      );
-      setSavedRecipes(savedRecipes.filter((r) => r.title !== recipeTitle)); // Remove from saved
-    }
+    setDislikedRecipes((prevDisliked) => {
+      if (prevDisliked.includes(recipeTitle)) {
+        return prevDisliked; // If already disliked, do nothing
+      }
+      const updatedDisliked = [...prevDisliked, recipeTitle];
+      localStorage.setItem("dislikedRecipes", JSON.stringify(updatedDisliked));
+      return updatedDisliked;
+    });
+
+    setSavedRecipes((prevSaved) => {
+      if (!prevSaved.some((r) => r.title === recipeTitle)) {
+        return prevSaved; // If not saved, do nothing
+      }
+      const updatedSaved = prevSaved.filter((r) => r.title !== recipeTitle);
+      localStorage.setItem("savedRecipes", JSON.stringify(updatedSaved));
+      return updatedSaved;
+    });
   };
 
   return (
