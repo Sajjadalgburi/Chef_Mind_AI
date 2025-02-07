@@ -4,9 +4,12 @@ export const getMealPlanPrompt = (
   metadata: MetaDataResponse,
   ingredients: IngredientsType
 ) => {
+  const recipeContext = metadata.map((item) => {
+    return `Item - ${item.text}, Source - ${item.source}`;
+  });
+
   const prompt = `
 You are a professional chef and culinary expert. Using the provided ingredients from a users fridge and recipe metadata, create a detailed and personalized meal plan.
-
 
 AVAILABLE INGREDIENTS IN THE USER'S FRIDGE:
 ${ingredients
@@ -14,7 +17,7 @@ ${ingredients
   .join("\n")}
 
 RELEVANT RECIPE CONTEXT:
-${metadata.map((item) => `source: ${item.source} - ${item.text}`).join("\n")}
+${recipeContext}
 
 TASK:
 Generate 4-6 (Even Numbers) creative recipe suggestions that:
@@ -54,7 +57,7 @@ OUTPUT FORMAT:
         "fat": "XXg"
       },
       "imagePrompt": "Detailed description for DALL-E image generation",
-      "source": "source of the recipe",
+      "source": "source of the recipe original recipe i provided",
       "tips": [
         "Cooking tip 1...",
         "Cooking tip 2..."
