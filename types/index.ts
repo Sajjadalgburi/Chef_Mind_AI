@@ -1,7 +1,7 @@
 // Type definition for the response containing metadata
 export type MetaDataResponse = {
   source: string;
-  text: string;
+  text: Array<string>;
 }[];
 
 // Type definition for the ingredients
