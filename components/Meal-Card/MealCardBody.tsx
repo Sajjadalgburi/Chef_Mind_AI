@@ -2,16 +2,15 @@ import { MealPlanResponse } from "@/types";
 import React from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, ChefHat, Utensils } from "lucide-react";
+import { Clock, Users, ChefHat, Utensils, Link } from "lucide-react";
 
 type Props = {
   recipes: MealPlanResponse["recipes"];
-  mealPlanImage: string | null;
 };
 
-const MealCardBody: React.FC<Props> = ({ recipes, mealPlanImage }) => {
+const MealCardBody: React.FC<Props> = ({ recipes }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+    <div className="grid grid-cols-1  lg:grid-cols-3 gap-6 w-full">
       {recipes.map(
         (
           {
@@ -23,16 +22,18 @@ const MealCardBody: React.FC<Props> = ({ recipes, mealPlanImage }) => {
             servings,
             ingredients,
             nutritionalInfo,
+            imageUrl,
+            source,
           },
           index
         ) => (
           <div
             key={index}
-            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+            className="bg-white flex flex-col justify-between gap-1 sm:gap-3 py-3 px-3 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100"
           >
-            <div className="relative h-48 w-full">
+            <div className="relative h-48 w-full rounded-lg overflow-hidden">
               <Image
-                src={mealPlanImage as string}
+                src={imageUrl as string}
                 alt={title}
                 className="w-full h-full object-cover"
                 width={400}
@@ -51,7 +52,7 @@ const MealCardBody: React.FC<Props> = ({ recipes, mealPlanImage }) => {
             </div>
 
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              <h3 className="text-xl md:text-3xl font-semibold text-gray-800 mb-3">
                 {title}
               </h3>
 
@@ -111,11 +112,10 @@ const MealCardBody: React.FC<Props> = ({ recipes, mealPlanImage }) => {
                   <span className="font-medium">{nutritionalInfo.carbs}</span>
                 </div>
               </div>
-
-              <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium">
-                View Full Recipe
-              </button>
             </div>
+            <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium">
+              <Link href={source}>View Full Recipe</Link>
+            </button>
           </div>
         )
       )}
