@@ -73,8 +73,6 @@ export async function POST(req: NextRequest) {
 
     const ingredients = JSON.parse(responseText);
 
-    console.log("---- Got Ingredients Back ----", ingredients);
-
     return NextResponse.json(
       { ingredients: ingredients.ingredients || [] },
       { status: 200 }
