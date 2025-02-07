@@ -2,6 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
+import {
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  UserButton,
+} from "@clerk/nextjs";
 
 export default function Header() {
   return (
@@ -20,17 +27,38 @@ export default function Header() {
             Beta
           </Badge>
         </div>
-        <Button variant="outline" size="sm">
-          <Link
-            href="https://github.com/Sajjadalgburi/snap_cook"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 h-[30px] sm:h-[40px] text-xs sm:text-sm"
-          >
-            <FaGithub className="h-4 w-4" />
-            GitHub Repo
-          </Link>
-        </Button>
+
+        <div className="flex items-center gap-2">
+          {/* When user is signed out */}
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button variant="outline" size="lg">
+                Sign In
+              </Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button variant="default" size="lg">
+                Sign Up
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+
+          {/* When user is Signed in */}
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+          <Button variant="outline" size="lg">
+            <Link
+              href="https://github.com/Sajjadalgburi/snap_cook"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 h-[30px] sm:h-[40px] text-xs sm:text-sm"
+            >
+              <FaGithub className="h-4 w-4" />
+              GitHub Repo
+            </Link>
+          </Button>
+        </div>
       </div>
     </header>
   );
