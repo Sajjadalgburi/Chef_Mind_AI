@@ -16,7 +16,6 @@ export type IngredientsType = [
 export type MealCardsProps = {
   isMealPlanLoading: boolean;
   recipes: MealPlanResponse["recipes"];
-  mealPlanImage: string | null;
 };
 
 // Type definition for a recipe
@@ -31,7 +30,8 @@ export type GenerateMealPlanProps = {
   setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
   prompt: string;
-  setMealPlanImage: React.Dispatch<React.SetStateAction<string | null>>;
+  setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type MealPlanResponse = {
@@ -58,6 +58,7 @@ export type MealPlanResponse = {
     imageUrl?: string;
     imagePrompt: string;
     tips: string[];
+    source: string;
   }>;
 };
 
@@ -67,7 +68,6 @@ export interface GenerateHandlerProps {
   setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
   setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
-  setMealPlanImage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export type HandleResetProps = {
@@ -75,5 +75,4 @@ export type HandleResetProps = {
   setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
   setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setImage: React.Dispatch<React.SetStateAction<string | null>>;
 };
