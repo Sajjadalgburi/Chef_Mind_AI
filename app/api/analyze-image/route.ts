@@ -31,6 +31,7 @@ IMPORTANT:
 }
 
 `;
+
 export async function POST(req: NextRequest) {
   try {
     const { image } = await req.json();
@@ -59,14 +60,22 @@ export async function POST(req: NextRequest) {
 
     let responseText = response.choices[0]?.message?.content?.trim() || "{}";
 
-    // Only clean the response if it starts with ```json and ends with ```
-    if (responseText.startsWith("```json") && responseText.endsWith("```")) {
-      responseText = responseText.slice(7, -3).trim(); // Remove ```json and ```
+    // Extract only the first valid JSON object
+    const firstBraceIndex = responseText.indexOf("{");
+    const lastBraceIndex = responseText.lastIndexOf("}");
+
+    if (firstBraceIndex !== -1 && lastBraceIndex !== -1) {
+      responseText = responseText.substring(
+        firstBraceIndex,
+        lastBraceIndex + 1
+      );
     }
+
+    console.log("---- Extracted JSON ----", responseText);
 
     const ingredients = JSON.parse(responseText);
 
-    console.log("---- Got Ingredients Back ----");
+    console.log("---- Got Ingredients Back ----", ingredients);
 
     return NextResponse.json(
       { ingredients: ingredients.ingredients || [] },
