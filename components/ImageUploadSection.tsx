@@ -2,7 +2,6 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { Upload, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 
@@ -30,7 +29,7 @@ const ImageUploadSection: React.FC<Props> = ({
               <Image
                 src={image}
                 alt="Uploaded content"
-                className="w-full h-[200px] sm:h-[250px] md:h-[300px] object-cover"
+                className="w-full h-full object-cover"
                 width={1920}
                 height={1080}
               />
@@ -62,20 +61,25 @@ const ImageUploadSection: React.FC<Props> = ({
             </label>
           )}
         </div>
-        <Button
-          size="lg"
-          aria-disabled={!image || loading}
+        <button
+          className={`cursor-pointer w-full sm:max-w-md p-3 sm:p-4 rounded-lg text-base sm:text-lg font-medium transition-all duration-300 text-white
+            ${
+              loading
+                ? "bg-slate-400 hover:bg-slate-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg hover:shadow-indigo-500/25"
+            }`}
+          disabled={loading}
           onClick={handleGenerate}
         >
           {loading ? (
-            <div className="flex items-center gap-3">
-              Processing
-              <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" />
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
+              <span className="text-sm sm:text-base">Processing</span>
+              <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
             </div>
           ) : (
-            "Generate"
+            <span className="text-sm sm:text-base">Generate</span>
           )}
-        </Button>
+        </button>
       </div>
     </Card>
   );
