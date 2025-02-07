@@ -16,6 +16,9 @@ Your task is to analyze the following list of detected items and extract a struc
 - Do NOT assume missing ingredients—only list what is detected
 - Do not include any other text or comments in your response, instead just output the JSON directly
 
+IMPORTANT:
+- Do not include any other text or comments in your response, instead just output the JSON directly
+- IF YOU CANNOT DETECT ANY INGREDIENTS OR IMAGE IS NOT CLEAR, RETURN AN EMPTY ARRAY
 ### **Expected Output Format:**
 {
   "ingredients": [
@@ -26,12 +29,8 @@ Your task is to analyze the following list of detected items and extract a struc
     }
   ]
 }
-  
-IMPORTANT:
-- Do not include any other text or comments in your response, instead just output the JSON directly
-- IF YOU CANNOT DETECT ANY INGREDIENTS OR IMAGE IS NOT CLEAR, RETURN AN EMPTY ARRAY
-`;
 
+`;
 export async function POST(req: NextRequest) {
   try {
     const { image } = await req.json();
@@ -58,14 +57,19 @@ export async function POST(req: NextRequest) {
       store: true,
     });
 
-    // Ensure only valid JSON is parsed
-    const responseText = response.choices[0]?.message?.content?.trim() || "{}";
-    const cleanedText = responseText.replace(/^```json|```$/g, "").trim();
-    const ingredients = JSON.parse(cleanedText);
+    let responseText = response.choices[0]?.message?.content?.trim() || "{}";
+
+    // Only clean the response if it starts with ```json and ends with ```
+    if (responseText.startsWith("```json") && responseText.endsWith("```")) {
+      responseText = responseText.slice(7, -3).trim(); // Remove ```json and ```
+    }
+
+    const ingredients = JSON.parse(responseText);
 
     console.log("---- Got Ingredients Back ----");
+
     return NextResponse.json(
-      { ingredients: ingredients.ingredients },
+      { ingredients: ingredients.ingredients || [] },
       { status: 200 }
     );
   } catch (error) {
