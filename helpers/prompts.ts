@@ -14,17 +14,17 @@ ${ingredients
   .join("\n")}
 
 RELEVANT RECIPE CONTEXT:
-${metadata.map((item) => item.text).join("\n")}
+${metadata.map((item) => `source: ${item.source} - ${item.text}`).join("\n")}
 
 TASK:
-Generate 8-10 creative recipe suggestions that:
+Generate 4-6 (Even Numbers) creative recipe suggestions that:
 - Primarily use the available ingredients
 - Are inspired by the provided recipe metadata
+- The first recipe in the array should be the recipe that uses the most ingredients from the users fridge and so on.
 - Include substitution suggestions for any missing essential ingredients
 - Consider ingredient quantities and portions
 
 IMPORTANT: MAKE SURE TO RETURN JSON FORMAT EXACTLY AS SHOWN BELOW
-
 OUTPUT FORMAT:
 {
   "recipes": [
@@ -54,13 +54,15 @@ OUTPUT FORMAT:
         "fat": "XXg"
       },
       "imagePrompt": "Detailed description for DALL-E image generation",
+      "source": "source of the recipe",
       "tips": [
         "Cooking tip 1...",
         "Cooking tip 2..."
       ]
     }
   ]
-}`;
+}
+`;
 
   return prompt;
 };
