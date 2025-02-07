@@ -2,7 +2,7 @@ import { Card } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 
 export const LoadingCard = () => (
-  <Card className="w-full p-6 mb-8">
+  <Card className="w-full p-6 mb-8 bg-gray-800/50">
     <div className="space-y-4">
       <Skeleton className="h-8 w-3/4" />
       <div className="flex items-center gap-4">
