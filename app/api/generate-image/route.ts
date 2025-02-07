@@ -9,6 +9,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
+export const runtime = "edge";
+
 export async function POST(request: Request) {
   try {
     // Make sure to check if the API key is set

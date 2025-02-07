@@ -5,6 +5,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+export const runtime = "edge";
+
 const mainPrompt = `
 You are a professional chef and food expert with advanced knowledge in ingredient identification.
 Your task is to analyze the following list of detected items and extract a structured list of ingredients.

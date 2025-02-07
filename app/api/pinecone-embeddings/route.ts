@@ -5,6 +5,8 @@ const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY!,
 });
 
+export const runtime = "edge";
+
 export async function POST(req: NextRequest) {
   try {
     const { queryVector } = await req.json();
