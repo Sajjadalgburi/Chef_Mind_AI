@@ -1,6 +1,5 @@
 "use client";
 
-import Header from "../components/Header";
 import Hero from "../components/Hero";
 import ImageUploadSection from "../components/ImageUploadSection";
 import Footer from "../components/Footer";
@@ -55,7 +54,6 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col justify-between items-center mx-auto bg-gradient-to-b">
       <div className="w-full max-w-4xl">
-        <Header />
         <Toaster position="top-center" reverseOrder={false} />
       </div>
 
