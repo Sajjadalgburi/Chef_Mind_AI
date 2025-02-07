@@ -260,6 +260,18 @@ export const handleGenerate = async ({
       body: JSON.stringify({ image }),
     });
 
+    // Extract rate limit headers
+    // const rateLimitLimit = response.headers.get("X-RateLimit-Limit");
+    // const rateLimitReset = response.headers.get("X-RateLimit-Reset");
+    const rateLimitRemaining = response.headers.get("X-RateLimit-Remaining");
+
+    // Check if the user has exceeded the limit
+    if (rateLimitRemaining === "0") {
+      toast.error("You have exceeded your trial. Please come back tomorrow.");
+      setLoading(false);
+      return;
+    }
+
     if (!response.ok) {
       toast.error("Error analyzing image... Please try again.");
       setTimeout(() => {
