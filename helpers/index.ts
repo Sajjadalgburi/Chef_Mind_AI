@@ -372,3 +372,72 @@ export const handleReset = ({
   setShowResults(false);
   setLoading(false);
 };
+
+export const recipePlaceHolders = [
+  {
+    title: "Spaghetti Carbonara",
+    cuisine: "Italian",
+    difficulty: "Easy",
+    prepTime: "10 min",
+    cookTime: "20 min",
+    servings: 4,
+    ingredients: [
+      { item: "Spaghetti", required: true },
+      { item: "Eggs", required: true },
+      { item: "Pancetta", required: true },
+      { item: "Parmesan Cheese", required: true },
+      { item: "Black Pepper", required: false },
+    ],
+    nutritionalInfo: {
+      calories: 500,
+      protein: "25g",
+      carbs: "60g",
+    },
+    imageUrl: "/images/spaghetti-carbonara.jpg",
+    source: "https://example.com/spaghetti-carbonara",
+  },
+  {
+    title: "Chicken Biryani",
+    cuisine: "Indian",
+    difficulty: "Medium",
+    prepTime: "30 min",
+    cookTime: "40 min",
+    servings: 6,
+    ingredients: [
+      { item: "Basmati Rice", required: true },
+      { item: "Chicken", required: true },
+      { item: "Yogurt", required: true },
+      { item: "Spices", required: true },
+      { item: "Onions", required: false },
+    ],
+    nutritionalInfo: {
+      calories: 700,
+      protein: "40g",
+      carbs: "80g",
+    },
+    imageUrl: "/images/chicken-biryani.jpg",
+    source: "https://example.com/chicken-biryani",
+  },
+  {
+    title: "Chicken Biryani",
+    cuisine: "Indian",
+    difficulty: "Medium",
+    prepTime: "30 min",
+    cookTime: "40 min",
+    servings: 6,
+    ingredients: [
+      { item: "Basmati Rice", required: true },
+      { item: "Chicken", required: true },
+      { item: "Yogurt", required: true },
+      { item: "Spices", required: true },
+      { item: "Onions", required: false },
+    ],
+    nutritionalInfo: {
+      calories: 700,
+      protein: "40g",
+      carbs: "80g",
+    },
+    imageUrl: "/images/chicken-biryani.jpg",
+    source: "https://example.com/chicken-biryani",
+  },
+];
