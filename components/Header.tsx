@@ -46,6 +46,11 @@ export default function Header() {
           {/* When user is Signed in */}
           <SignedIn>
             <UserButton />
+            <Link href="/profile">
+              <Button variant="outline" size="lg">
+                Profile
+              </Button>
+            </Link>
           </SignedIn>
           <Button variant="outline" size="lg">
             <Link
