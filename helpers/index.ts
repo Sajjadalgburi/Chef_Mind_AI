@@ -23,7 +23,6 @@ export const generateIngredientEmbedding = async (
     setRecipes,
     setShowResults,
     setLoading,
-    setImage,
   }: HandleResetProps
 ) => {
   try {
@@ -43,7 +42,6 @@ export const generateIngredientEmbedding = async (
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -64,7 +62,6 @@ export const generateIngredientEmbedding = async (
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -80,7 +77,6 @@ export const generateIngredientEmbedding = async (
         setRecipes,
         setShowResults,
         setLoading,
-        setImage,
       });
     }, 3000);
   }
@@ -98,7 +94,6 @@ export const getEmbeddingMetaData = async (
     setRecipes,
     setShowResults,
     setLoading,
-    setImage,
   }: HandleResetProps
 ) => {
   try {
@@ -118,7 +113,6 @@ export const getEmbeddingMetaData = async (
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -134,7 +128,6 @@ export const getEmbeddingMetaData = async (
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return { error: "No metadata found" };
@@ -150,7 +143,6 @@ export const getEmbeddingMetaData = async (
         setRecipes,
         setShowResults,
         setLoading,
-        setImage,
       });
     }, 3000);
   }
@@ -162,14 +154,7 @@ export const generateMealPlan = async ({
   prompt,
   setShowResults,
   setLoading,
-  setImage,
-  setMealPlanImage,
-}: GenerateMealPlanProps & {
-  setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setImage: React.Dispatch<React.SetStateAction<string | null>>;
-  setMealPlanImage: React.Dispatch<React.SetStateAction<string | null>>;
-}) => {
+}: GenerateMealPlanProps) => {
   try {
     setIsMealPlanLoading(true);
 
@@ -182,104 +167,53 @@ export const generateMealPlan = async ({
     });
 
     if (!res.ok) {
-      setIsMealPlanLoading(false);
-      toast.error("Failed to generate meal plan. Please try again.");
-      setTimeout(() => {
-        handleReset({
-          setIsMealPlanLoading,
-          setRecipes,
-          setShowResults,
-          setLoading,
-          setImage,
-        });
-      }, 3000);
-      return { error: "Failed to generate meal plan" };
+      throw new Error("Failed to generate meal plan");
     }
 
     const response = await res.json();
     const { mealPlan }: { mealPlan: MealPlanResponse["recipes"] } = response;
 
-    const imagePrompt = mealPlan[0].imagePrompt;
-
-    if (!mealPlan) {
-      setIsMealPlanLoading(false);
-
-      toast.error("No meal plan found. Please try again.");
-      setTimeout(() => {
-        handleReset({
-          setIsMealPlanLoading,
-          setRecipes,
-          setShowResults,
-          setLoading,
-          setImage,
-        });
-      }, 3000);
-      return { error: "No meal plan found" };
-    }
-    if (!imagePrompt) {
-      toast.error("No image prompt found");
-      setTimeout(() => {
-        handleReset({
-          setIsMealPlanLoading,
-          setRecipes,
-          setShowResults,
-          setLoading,
-          setImage,
-        });
-      }, 3000);
-      return { error: "No image prompt found" };
+    if (!mealPlan || mealPlan.length === 0) {
+      throw new Error("No meal plan found");
     }
 
-    const imageRes = await fetch("/api/generate-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imagePrompt }),
-    });
+    // Generate images for each meal in parallel
+    const updatedMealPlan = await Promise.all(
+      mealPlan.map(async (meal) => {
+        if (!meal.imagePrompt) return meal; // Skip if no image prompt
 
-    if (!imageRes.ok) {
-      toast.error("Failed to generate image. Please try again.");
-      setTimeout(() => {
-        handleReset({
-          setIsMealPlanLoading,
-          setRecipes,
-          setShowResults,
-          setLoading,
-          setImage,
-        });
-      }, 3000);
+        try {
+          const imageRes = await fetch("/api/generate-image", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ imagePrompt: meal.imagePrompt as string }),
+          });
 
-      return { error: "Failed to generate image" };
-    }
+          if (!imageRes.ok) {
+            console.error(`Failed to generate image for: ${meal.title}`);
+            return meal;
+          }
 
-    const { imageUrl }: { imageUrl: string } = await imageRes.json();
-
-    console.log("GOT BACK DALLE IMAGE", imageUrl);
-
-    if (!imageUrl) {
-      toast.error("No image URL found");
-
-      setTimeout(() => {
-        handleReset({
-          setIsMealPlanLoading,
-          setRecipes,
-          setShowResults,
-          setLoading,
-          setImage,
-        });
-      }, 3000);
-      return { error: "No image URL found" };
-    }
+          const { imageUrl }: { imageUrl: string } = await imageRes.json();
+          return { ...meal, imageUrl }; // Return meal with updated image URL
+        } catch (err) {
+          console.error(`Error generating image for: ${meal.title}`, err);
+          return meal;
+        }
+      })
+    );
 
     setIsMealPlanLoading(false);
-    setRecipes(mealPlan);
-    setShowResults(true);
-    setLoading(false);
-    setMealPlanImage(imageUrl);
+    setRecipes(updatedMealPlan);
   } catch (error) {
     console.error("Error generating meal plan:", error);
-    toast.error("An unexpected error occurred. Please try again.");
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "An unexpected error occurred. Please try again."
+    );
 
     setTimeout(() => {
       handleReset({
@@ -287,9 +221,9 @@ export const generateMealPlan = async ({
         setRecipes,
         setShowResults,
         setLoading,
-        setImage,
       });
     }, 3000);
+
     setIsMealPlanLoading(false);
   } finally {
     setIsMealPlanLoading(false);
@@ -302,11 +236,7 @@ export const handleGenerate = async ({
   setShowResults,
   setIsMealPlanLoading,
   setRecipes,
-  setImage,
-  setMealPlanImage,
-}: GenerateHandlerProps & {
-  setImage: React.Dispatch<React.SetStateAction<string | null>>;
-}) => {
+}: GenerateHandlerProps) => {
   try {
     if (!image) {
       toast.error("Please upload an image");
@@ -316,7 +246,6 @@ export const handleGenerate = async ({
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -339,7 +268,6 @@ export const handleGenerate = async ({
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -356,7 +284,6 @@ export const handleGenerate = async ({
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -370,7 +297,6 @@ export const handleGenerate = async ({
       setRecipes,
       setShowResults,
       setLoading,
-      setImage,
     });
 
     if (typeof embedding === "string" || embedding === undefined) {
@@ -383,7 +309,6 @@ export const handleGenerate = async ({
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -394,7 +319,6 @@ export const handleGenerate = async ({
       setRecipes,
       setShowResults,
       setLoading,
-      setImage,
     });
 
     if (!metadata) {
@@ -405,7 +329,6 @@ export const handleGenerate = async ({
           setRecipes,
           setShowResults,
           setLoading,
-          setImage,
         });
       }, 3000);
       return;
@@ -419,8 +342,6 @@ export const handleGenerate = async ({
       prompt,
       setShowResults,
       setLoading,
-      setImage,
-      setMealPlanImage,
     });
   } catch (error) {
     console.error("Error in handleGenerate:", error);
@@ -432,7 +353,6 @@ export const handleGenerate = async ({
         setRecipes,
         setShowResults,
         setLoading,
-        setImage,
       });
     }, 3000);
   }
@@ -441,17 +361,14 @@ export const handleGenerate = async ({
 /**
  * Function to reset the page page to normal after errors
  */
-
 export const handleReset = ({
   setIsMealPlanLoading,
   setRecipes,
   setShowResults,
   setLoading,
-  setImage,
 }: HandleResetProps) => {
   setIsMealPlanLoading(false);
   setRecipes([]);
   setShowResults(false);
   setLoading(false);
-  setImage(null);
 };
