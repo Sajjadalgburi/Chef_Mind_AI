@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { MealCardsProps } from "@/types";
 import MealCardBody from "./MealCardBody";
 import { LoadingCard } from "./LoadingCard";
+import PlaceholderCardBody from "./PlaceholderCardBody";
+
+// TODO: Remove this in production
+const testing = false;
 
 const MealCards: React.FC<MealCardsProps> = ({
   isMealPlanLoading,
   recipes,
-  mealPlanImage,
 }) => {
   const [visibleSkeletons, setVisibleSkeletons] = useState(1);
 
@@ -29,12 +32,7 @@ const MealCards: React.FC<MealCardsProps> = ({
           Your Personalized Meal Plan
         </h1>
 
-        <MealCardBody recipes={recipes} mealPlanImage={mealPlanImage} />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {Array.from({ length: visibleSkeletons }).map((_, index) => (
-            <LoadingCard key={index} />
-          ))}
-        </div>
+        {testing ? <PlaceholderCardBody /> : <MealCardBody recipes={recipes} />}
       </div>
     </div>
   ) : (
