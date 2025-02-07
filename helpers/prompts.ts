@@ -5,30 +5,31 @@ export const getMealPlanPrompt = (
   ingredients: IngredientsType
 ) => {
   const recipeContext = metadata.map((item) => {
-    return `Item - ${item.text}, Source - ${item.source}`;
+    return `Item: ${item.text}, Source: ${item.source}`;
   });
 
   const prompt = `
-You are a professional chef and culinary expert. Using the provided ingredients from a users fridge and recipe metadata, create a detailed and personalized meal plan.
+You are a professional chef and culinary expert. Using the provided ingredients from a user's fridge and relevant recipe metadata, create a personalized meal plan.
 
 AVAILABLE INGREDIENTS IN THE USER'S FRIDGE:
 ${ingredients
   .map((ing) => `- ${ing.name} (${ing.quantity}) [${ing.category}]`)
   .join("\n")}
 
-RELEVANT RECIPE CONTEXT:
-${recipeContext}
+RELEVANT RECIPE CONTEXT (INCLUDING ORIGINAL SOURCES):
+${recipeContext.join("\n")}
 
 TASK:
-Generate 4-6 (Even Numbers) creative recipe suggestions that:
+Generate 4-6 (even numbers) creative recipe suggestions that:
 - Primarily use the available ingredients
 - Are inspired by the provided recipe metadata
-- The first recipe in the array should be the recipe that uses the most ingredients from the users fridge and so on.
+- The first recipe in the array should use the most ingredients from the user's fridge, and so on
 - Include substitution suggestions for any missing essential ingredients
 - Consider ingredient quantities and portions
 
-IMPORTANT: MAKE SURE TO RETURN JSON FORMAT EXACTLY AS SHOWN BELOW
-OUTPUT FORMAT:
+IMPORTANT: ENSURE THE OUTPUT IS IN THE EXACT JSON FORMAT BELOW.
+
+### OUTPUT FORMAT:
 {
   "recipes": [
     {
@@ -57,7 +58,7 @@ OUTPUT FORMAT:
         "fat": "XXg"
       },
       "imagePrompt": "Detailed description for DALL-E image generation",
-      "source": "source of the recipe original recipe i provided",
+      "source": "Original source of the recipe from provided metadata",
       "tips": [
         "Cooking tip 1...",
         "Cooking tip 2..."
@@ -65,6 +66,8 @@ OUTPUT FORMAT:
     }
   ]
 }
+
+IMPORTANT: Ensure that the "source" field for each recipe correctly maps to the relevant source from the provided metadata.
 `;
 
   return prompt;
