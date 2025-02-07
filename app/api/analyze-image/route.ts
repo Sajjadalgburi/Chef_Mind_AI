@@ -57,9 +57,12 @@ export async function POST(req: NextRequest) {
       ],
       store: true,
     });
-    const ingredients = JSON.parse(
-      response.choices[0]?.message?.content || "No ingredients detected"
-    );
+
+    // Ensure only valid JSON is parsed
+    const responseText = response.choices[0]?.message?.content?.trim() || "{}";
+    const cleanedText = responseText.replace(/^```json|```$/g, "").trim();
+    const ingredients = JSON.parse(cleanedText);
+
     console.log("---- Got Ingredients Back ----");
     return NextResponse.json(
       { ingredients: ingredients.ingredients },
