@@ -19,25 +19,26 @@ export default function Home() {
   const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
   const [recipes, setRecipes] = useState<MealPlanResponse["recipes"]>([]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      toast.error("Please upload an image");
-      setImage(null);
-      return;
-    }
+  const processImage = async (imageSrc: string) => {
+    try {
+      const response = await fetch(imageSrc);
+      const blob = await response.blob();
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image must be less than 10MB");
-      setImage(null);
-      return;
-    }
+      if (blob.size > 10 * 1024 * 1024) {
+        toast.error("Image must be less than 10MB");
+        setImage(null);
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setImage(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setImage(result);
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error("Error processing image:", error);
+    }
   };
 
   const handleGenerateClick = async () => {
@@ -67,8 +68,8 @@ export default function Home() {
               setImage={setImage}
               image={image}
               loading={loading}
-              handleImageUpload={handleImageUpload}
               handleGenerate={handleGenerateClick}
+              processImage={processImage}
             />
           </div>
         )}
