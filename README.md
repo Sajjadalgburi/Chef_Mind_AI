@@ -11,7 +11,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 | Vector Database                                    | Pinecone                                        |
 | Recipe Generation                                  | GPT-4 (context-based customization)             |
 | AI Image Generation                                | DALL·E 3                                        |
-| Authentication                                     | Clerk or Supabase Auth                          |
+| Authentication                                     | Clerk                      |
 | Database (Optional for history & user preferences) | Supabase / PostgreSQL                           |
 | Hosting                                            | Vercel (Frontend & Serverless API)              |
 
