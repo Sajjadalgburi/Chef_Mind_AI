@@ -13,22 +13,22 @@ import { getMealPlanPrompt } from "./prompts";
 
 export const imagesPic = [
   {
-    src: "/preset/fridge_1.jpg",
+    src: "/images/fridge_1.jpg",
     alt: "Well-stocked family fridge",
     description: "Family Fridge",
   },
   {
-    src: "/preset/fridge_2.jpg",
+    src: "/images/fridge_2.jpg",
     alt: "Vegetarian fridge contents",
     description: "Vegetarian Setup",
   },
   {
-    src: "/preset/fridge_3.webp",
+    src: "/images/fridge_3.webp",
     alt: "Bachelor fridge example",
     description: "Bachelor Fridge",
   },
   {
-    src: "/preset/fridge_4.jpg",
+    src: "/images/fridge_4.jpg",
     alt: "Meal prep fridge layout",
     description: "Meal Prep Ready",
   },
