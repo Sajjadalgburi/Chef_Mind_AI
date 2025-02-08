@@ -35,7 +35,7 @@ const ImageUploadSection: React.FC<Props> = ({
                 <Image
                   src={image}
                   alt="Uploaded content"
-                  className="w-full h-full object-cover"
+                  className="w-full h-[90vh] object-cover"
                   width={1920}
                   height={1080}
                 />
