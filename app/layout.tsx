@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
-  title: "Snap Cook",
+  title: "Chef Mind",
   description:
     "Turn your fridge into a meal with enhanced LLM and image processing and over million recipes",
 };
