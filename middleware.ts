@@ -1,7 +1,7 @@
 import { ClerkMiddlewareAuth, clerkMiddleware } from "@clerk/nextjs/server";
+import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextRequest, NextResponse } from "next/server";
-import { Ratelimit } from "@upstash/ratelimit";
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
@@ -24,6 +24,7 @@ export default clerkMiddleware(
     //Rate limit APIs
     if (isAPI(request.nextUrl.pathname)) {
       const { userId } = await auth();
+
       const { success, limit, reset, remaining } = await ratelimit.limit(
         `${userId}`
       );
