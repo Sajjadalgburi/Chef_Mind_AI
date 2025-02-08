@@ -20,7 +20,7 @@ export default function Header() {
             className="no-underline hover:bg-gray-100 rounded-md p-2 transition-colors"
           >
             <span className="text-base xs:text-2xl sm:text-2xl md:text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-yellow-600">
-              Snap Cook
+              Chef Mind
             </span>
           </Link>
           <Badge variant="secondary" className="text-xs">
@@ -54,7 +54,7 @@ export default function Header() {
           </SignedIn>
           <Button variant="outline" size="lg">
             <Link
-              href="https://github.com/Sajjadalgburi/snap_cook"
+              href="https://github.com/Sajjadalgburi/Chef_Mind_AI"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 h-[30px] sm:h-[40px] text-xs sm:text-sm"
