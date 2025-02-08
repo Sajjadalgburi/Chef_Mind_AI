@@ -63,7 +63,7 @@ export default function Home() {
           recipes={recipes as MealPlanResponse["recipes"]}
         />
       ) : (
-        <div className="flex flex-col items-center justify-between gap-4 px-4 max-w-4xl text-center mb-[5rem] sm:mb-0">
+        <div className="flex flex-col items-center justify-between gap-4 px-4 w-full text-center mb-[5rem] sm:mb-0">
           <Hero image={image as string} />
 
           <ImageUploadSection
