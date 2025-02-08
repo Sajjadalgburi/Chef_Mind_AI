@@ -9,11 +9,6 @@ const nextConfig: NextConfig = {
         hostname: "oaidalleapiprodscus.blob.core.windows.net",
       },
     ],
-    domains: [
-      "localhost",
-      "oaidalleapiprodscus.blob.core.windows.net",
-      "chefmind.app",
-    ],
   },
 };
 
