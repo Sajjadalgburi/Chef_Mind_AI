@@ -1,52 +1,21 @@
-import { ClerkMiddlewareAuth, clerkMiddleware } from "@clerk/nextjs/server";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/utils/supabase/middleware";
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
-
-const ratelimit = new Ratelimit({
-  redis: redis,
-  limiter: Ratelimit.slidingWindow(35, "86400 s"), // 25 requests per day
-  ephemeralCache: new Map(),
-  analytics: true,
-});
-
-const isAPI = (path: string) => {
-  return path.startsWith("/api/") || path.startsWith("/app/api/");
-};
-
-export default clerkMiddleware(
-  async (auth: ClerkMiddlewareAuth, request: NextRequest) => {
-    //Rate limit APIs
-    if (isAPI(request.nextUrl.pathname)) {
-      const { userId } = await auth();
-
-      const { success, limit, reset, remaining } = await ratelimit.limit(
-        `${userId}`
-      );
-
-      const res = success
-        ? NextResponse.next()
-        : NextResponse.json(
-            { errorMessage: "Rate limit exceeded. Please try again later." },
-            { status: 429 }
-          );
-
-      res.headers.set("X-RateLimit-Limit", limit.toString());
-      res.headers.set("X-RateLimit-Remaining", remaining.toString());
-      res.headers.set("X-RateLimit-Reset", reset.toString());
-
-      if (!success) return res;
-      return res;
-    }
-    return NextResponse.next();
-  }
-);
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
+}
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+     * - / (home path) to keep it unprotected
+     * Feel free to modify this pattern to include more paths.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg,gif|webp)$|/).*)",
+  ],
 };
