@@ -1,7 +1,7 @@
 "use client";
 
 import Hero from "../components/Hero";
-import ImageUploadSection from "../components/ImageUploadSection";
+import ImageUploadSection from "../components/Homepage-stuff/ImageUploadSection";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { handleGenerate } from "@/helpers";
