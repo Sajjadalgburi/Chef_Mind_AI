@@ -1,16 +1,10 @@
 import AuthForm from "@/components/AuthForm";
-import { FormMessage, Message } from "@/components/form-message";
+import { Message } from "@/components/form-message";
 
-export default function Signup(props: { searchParams: Message }) {
-  const { searchParams } = props;
-
-  if ("message" in searchParams) {
-    return (
-      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
-        <FormMessage message={searchParams} />
-      </div>
-    );
-  }
+export default async function Signup(props: {
+  searchParams: Promise<Message>;
+}) {
+  const searchParams = await props.searchParams; // Await the promise to resolve
 
   return <AuthForm searchParams={searchParams} type="register" />;
 }
