@@ -12,9 +12,5 @@ export default function Signup(props: { searchParams: Message }) {
     );
   }
 
-  return (
-    <form className="flex flex-col min-w-64 md:min-w-80 mx-auto p-7 rounded-lg shadow-2xl">
-      <AuthForm searchParams={searchParams} type="register" />
-    </form>
-  );
+  return <AuthForm searchParams={searchParams} type="register" />;
 }
