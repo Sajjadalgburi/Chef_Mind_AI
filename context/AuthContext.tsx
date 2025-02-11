@@ -21,6 +21,7 @@ export const AuthContextProvider = ({
   const [userSession, setUserSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -36,17 +37,31 @@ export const AuthContextProvider = ({
     getUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUserSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+      (e, session) => {
+        setTimeout(async () => {
+          if (e === "INITIAL_SESSION") {
+            console.log("INITIAL_SESSION");
+            setUserSession(session);
+            setUser(session?.user as User);
+          } else if (e === "SIGNED_IN") {
+            console.log("SIGNED_IN");
+            setUserSession(session);
+            setUser(session?.user as User);
+          } else if (e === "SIGNED_OUT") {
+            console.log("SIGNED_OUT");
+            setUserSession(null);
+            setUser(null);
+          }
+
+          setLoading(false);
+        }, 0);
       }
     );
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabase.auth, user]);
 
   const value = {
     session: userSession,
