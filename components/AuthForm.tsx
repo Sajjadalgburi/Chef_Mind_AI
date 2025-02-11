@@ -15,14 +15,14 @@ const AuthForm = async (props: AuthFormProps) => {
   const { searchParams } = props;
 
   return (
-    <>
+    <form className="flex flex-col min-w-64 md:min-w-80 mx-auto bg-white p-7 rounded-lg shadow-2xl">
       <h1 className="sm:text-4xl font-2xl font-bold">
         {props.type === "login" ? "Login" : "Register"}
       </h1>
 
       <p className="text-sm text-foreground">
         {props.type === "login"
-          ? "Don&apos;t have an account? "
+          ? "Don't have an account? "
           : "Already have an account? "}
         <Link
           className="text-primary font-medium underline"
@@ -72,7 +72,7 @@ const AuthForm = async (props: AuthFormProps) => {
 
         <FormMessage message={searchParams} />
       </div>
-    </>
+    </form>
   );
 };
 
