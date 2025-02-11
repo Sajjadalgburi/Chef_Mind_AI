@@ -2,13 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useUser } from "@/context/AuthContext";
+import { useUser } from "@/hooks/useUserHook";
 import { Loader2 } from "lucide-react";
-import { signOutAction } from "@/actions/actions";
 import { useEffect, useState } from "react";
+import { signOutAction } from "@/actions/actions";
 
 const UserNav = () => {
-  const { user, loading } = useUser();
+  const { user } = useUser();
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   useEffect(() => {
@@ -21,9 +21,9 @@ const UserNav = () => {
     </div>
   ) : (
     <>
-      {user !== null ? (
+      {user !== undefined && user !== null ? (
         <div className="flex items-center gap-2">
-          {loading ? (
+          {isPageLoading ? (
             <div>
               <Loader2 className="w-4 h-4 animate-spin" />
             </div>
