@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
 
@@ -26,17 +26,31 @@ export const AuthContextProvider = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Gets initial session and uses that session to set the user
+    const getSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setUserSession(session);
       setUser(session?.user ?? null);
-    });
+    };
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session); // Added debug log
-      setUserSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    getSession();
+
+    // This listens for any event changes and updates the user session and user
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event, session); // Added debug log
+        setUserSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // On Unmount, unsubscribe from the auth listener
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const value = {
@@ -46,14 +60,4 @@ export const AuthContextProvider = ({
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useUser = () => {
-  const context = useContext(AuthContext);
-
-  if (context === undefined) {
-    throw new Error("useUser must be used within a AuthContextProvider.");
-  }
-
-  return context;
 };
