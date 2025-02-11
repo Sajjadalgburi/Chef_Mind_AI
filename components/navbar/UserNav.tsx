@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useUser } from "@/hooks";
+import { useUser } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 import { signOutAction } from "@/actions/actions";
 import { useEffect, useState } from "react";
