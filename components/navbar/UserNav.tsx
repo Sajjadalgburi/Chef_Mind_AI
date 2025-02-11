@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useUser } from "@/hooks";
 import { Loader2 } from "lucide-react";
+import { signOutAction } from "@/actions/actions";
 
 const UserNav = () => {
   const { user, loading } = useUser();
@@ -11,12 +12,16 @@ const UserNav = () => {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Button variant="ghost" className="text-olive hover:bg-olive/5">
+        <Button
+          asChild
+          className="text-olive rounded-sm bg-olive/10 hover:bg-olive/20 text-sm md:text-xl"
+        >
           <Link href="/sign-in">Sign In</Link>
         </Button>
+
         <Button
-          variant="default"
-          className="bg-terracotta hover:bg-terracotta/90"
+          asChild
+          className="bg-terracotta text-white rounded-sm hover:bg-terracotta/90 text-sm md:text-xl"
         >
           <Link href="/sign-up">Get Started</Link>
         </Button>
@@ -38,7 +43,16 @@ const UserNav = () => {
             width={32}
             height={32}
           /> */}
-          <Link href="/profile">Profile</Link>
+          <Button
+            asChild
+            className="text-olive bg-olive/10 text-sm md:text-xl rounded-sm hover:bg-olive/20 transition-colors duration-200"
+          >
+            <Link href="/profile">Profile</Link>
+          </Button>
+
+          <Button className="text-sm md:text-xl" onClick={signOutAction}>
+            Logout
+          </Button>
         </div>
       )}
     </div>
