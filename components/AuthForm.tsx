@@ -7,7 +7,7 @@ import { FormMessage, Message } from "./form-message";
 import { signInAction, signUpAction } from "@/actions/actions";
 
 type AuthFormProps = {
-  searchParams: Message;
+  searchParams: Message | Promise<Message>;
   type: "login" | "register";
 };
 
@@ -70,7 +70,7 @@ const AuthForm = async (props: AuthFormProps) => {
           </SubmitButton>
         )}
 
-        <FormMessage message={searchParams} />
+        <FormMessage message={searchParams as Message} />
       </div>
     </form>
   );
