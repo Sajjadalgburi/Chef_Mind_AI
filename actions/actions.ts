@@ -63,7 +63,7 @@ export const signUpAction = async (formData: FormData) => {
   return encodedRedirect(
     "success",
     "/sign-in",
-    "Thanks for creating a new account with Fitness AI."
+    "Thanks for creating a new account with Chef Made AI."
   );
 };
 
@@ -81,7 +81,8 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/");
+  revalidatePath("/");
+  redirect("/");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
