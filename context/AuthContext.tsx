@@ -1,4 +1,5 @@
 "use client";
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
@@ -13,6 +14,8 @@ export const AuthContext = createContext<{
   loading: true,
 });
 
+const supabase = createClient();
+
 export const AuthContextProvider = ({
   children,
 }: {
@@ -22,46 +25,19 @@ export const AuthContextProvider = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createClient();
-
   useEffect(() => {
-    const getUser = async () => {
-      await supabase.auth.getSession().then(({ data: { session } }) => {
-        setUserSession(session);
-        setUser(session?.user ?? null);
-      });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserSession(session);
+      setUser(session?.user ?? null);
+    });
 
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session); // Added debug log
+      setUserSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
-    };
-
-    getUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (e, session) => {
-        setTimeout(async () => {
-          if (e === "INITIAL_SESSION") {
-            console.log("INITIAL_SESSION");
-            setUserSession(session);
-            setUser(session?.user as User);
-          } else if (e === "SIGNED_IN") {
-            console.log("SIGNED_IN");
-            setUserSession(session);
-            setUser(session?.user as User);
-          } else if (e === "SIGNED_OUT") {
-            console.log("SIGNED_OUT");
-            setUserSession(null);
-            setUser(null);
-          }
-
-          setLoading(false);
-        }, 0);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [supabase.auth, user]);
+    });
+  }, []);
 
   const value = {
     session: userSession,
