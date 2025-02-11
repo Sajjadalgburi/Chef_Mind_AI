@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useUser } from "@/context/AuthContext";
+import { useUser } from "@/hooks/useUserHook";
 import GenerateButton from "./GenerateButton";
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 };
 
 const GenerateSection: React.FC<Props> = ({ loading, handleGenerate }) => {
-  const { user, loading: userLoading } = useUser();
+  const { user } = useUser();
 
   if (!user) {
     return (
@@ -21,7 +21,7 @@ const GenerateSection: React.FC<Props> = ({ loading, handleGenerate }) => {
     );
   }
 
-  if (userLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center gap-2 sm:gap-3">
         <span className="text-sm sm:text-base">Processing</span>
