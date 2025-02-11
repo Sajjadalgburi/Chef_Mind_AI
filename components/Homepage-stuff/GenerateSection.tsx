@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useUser } from "@/hooks";
+import { useUser } from "@/context/AuthContext";
 import GenerateButton from "./GenerateButton";
 
 type Props = {
