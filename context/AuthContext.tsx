@@ -1,28 +1,32 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { createContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { createClient } from "@/utils/supabase/client";
+import { supabaseClient } from "@/config/supabase-config-client";
 
+// Create a context for the auth state
 export const AuthContext = createContext<{
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
+  user: User | null | undefined;
+  session: Session | null | undefined;
+  signOut?: () => Promise<void>;
 }>({
   user: null,
   session: null,
-  loading: true,
+  signOut: async () => {},
 });
 
-const supabase = createClient();
-
+/**
+ * This is a context provider for the auth state
+ */
 export const AuthContextProvider = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode | any;
 }) => {
-  const [userSession, setUserSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User>();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,22 +34,26 @@ export const AuthContextProvider = ({
     const getSession = async () => {
       const {
         data: { session },
-      } = await supabase.auth.getSession();
-      setUserSession(session);
-      setUser(session?.user ?? null);
+        error,
+      } = await supabaseClient.auth.getSession();
+
+      if (error) throw error;
+
+      setSession(session);
+      setUser(session?.user);
+      setLoading(false);
     };
 
-    getSession();
-
     // This listens for any event changes and updates the user session and user
-    const { data: authListener } = supabase.auth.onAuthStateChange(
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
       (event, session) => {
-        console.log("Auth state changed:", event, session); // Added debug log
-        setUserSession(session);
-        setUser(session?.user ?? null);
+        setSession(session);
+        setUser(session?.user);
         setLoading(false);
       }
     );
+
+    getSession();
 
     // On Unmount, unsubscribe from the auth listener
     return () => {
@@ -54,9 +62,11 @@ export const AuthContextProvider = ({
   }, []);
 
   const value = {
-    session: userSession,
+    session: session,
     user: user,
-    loading: loading,
+    signOut: async () => {
+      await supabaseClient.auth.signOut();
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
