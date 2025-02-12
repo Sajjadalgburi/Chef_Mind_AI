@@ -53,12 +53,12 @@ const AuthForm = () => {
               className={`flex items-center justify-center capitalize ${
                 isLoggingIn
                   ? "opacity-50 cursor-not-allowed"
-                  : "hover:opacity-90 hover:scale-105 cursor-pointer transition-all duration-1000"
+                  : "hover:opacity-90 hover:scale-[1.02] cursor-pointer transition-all ease-in-out duration-200"
               } gap-3 p-4 border rounded-lg ${
                 provider.name === "Google"
                   ? "bg-white text-black"
                   : "bg-black text-white"
-              } text-lg  transition-opacity`}
+              } text-lg`}
             >
               {provider.name === "Google" ? <FaGoogle /> : <FaGithub />} Sign in
               with {provider.name}
