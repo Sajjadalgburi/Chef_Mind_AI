@@ -27,9 +27,16 @@ export default async function RootLayout({
 }) {
   const session = await auth();
 
+  const user = {
+    id: session?.user?.id,
+    email: session?.user?.email,
+    name: session?.user?.name,
+    image: session?.user?.image,
+  };
+
   return (
     <html lang="en">
-      <AuthProvider session={session}>
+      <AuthProvider session={session} user={user}>
         <body className={inter.className}>
           <Header />
           {children}
