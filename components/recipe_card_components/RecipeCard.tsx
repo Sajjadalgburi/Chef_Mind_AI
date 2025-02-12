@@ -9,6 +9,7 @@ import RecipeActions from "./RecipeActions";
 interface RecipeCardProps {
   recipe: MealPlanResponse["recipes"][0];
   isSaved: boolean;
+  isCreatingRecipes?: boolean;
   isDisliked: boolean;
   onSave: (recipe: MealPlanResponse["recipes"][0]) => void;
   onDislike: (recipeTitle: string) => void;
@@ -17,6 +18,7 @@ interface RecipeCardProps {
 const RecipeCard = ({
   recipe,
   isSaved,
+  isCreatingRecipes,
   isDisliked,
   onSave,
   onDislike,
@@ -38,6 +40,7 @@ const RecipeCard = ({
         recipe={recipe}
         isSaved={isSaved}
         isDisliked={isDisliked}
+        isCreatingRecipes={isCreatingRecipes}
         onSave={onSave}
         onDislike={onDislike}
       />
