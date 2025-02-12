@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import useAuth from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
-import { useSession } from "next-auth/react";
 
 type Props = {
   loading: boolean;
@@ -10,7 +10,7 @@ type Props = {
 };
 
 const GenerateSection: React.FC<Props> = ({ loading, handleGenerate }) => {
-  const { data: session } = useSession();
+  const { session } = useAuth();
 
   return (
     <>
