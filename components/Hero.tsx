@@ -1,4 +1,21 @@
+import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
 export default function Hero({ image }: { image: string }) {
+  const [imageLoading, setImageLoading] = useState(true);
+
+  useEffect(() => {
+    if (image) {
+      const img = new Image();
+      img.src = image;
+      img.onload = () => setImageLoading(false);
+    }
+  }, [image]);
+
+  if (image && imageLoading) {
+    return <Skeleton className="w-full h-[300px] rounded-lg" />;
+  }
+
   return (
     <div className="text-center max-w-4xl mx-auto px-6 pt-20 pb-16">
       <h1
