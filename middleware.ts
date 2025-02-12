@@ -1,21 +1,40 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "@/utils/supabase/middleware";
+import { auth } from "@/app/auth";
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+import { NextRequest, NextResponse } from "next/server";
+
+export { auth as middleware } from "@/app/auth";
+
+export const protectedRoutes = [
+  "/api/generate-meal-plan",
+  "/api/analyze-image",
+  "/api/generate-image",
+  "/api/openai-embeddings",
+  "/api/pinecone-embeddings",
+];
+
+export default async function middleware(req: NextRequest) {
+  const { nextUrl } = req;
+  const session = await auth();
+
+  const pathname = nextUrl.pathname;
+
+  const isProtected = protectedRoutes.some((r) => {
+    return pathname.startsWith(r);
+  });
+
+  if (isProtected && !session) {
+    return NextResponse.redirect(new URL("/api/auth/signin", nextUrl));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * - / (home path) to keep it unprotected
-     * Feel free to modify this pattern to include more paths.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg,gif|webp)$|/).*)",
+    "/api/generate-meal-plan",
+    "/api/analyze-image",
+    "/api/generate-image",
+    "/api/openai-embeddings",
+    "/api/pinecone-embeddings",
   ],
 };
