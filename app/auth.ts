@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import { SupabaseAdapter } from "@auth/supabase-adapter";
-import jwt from "jsonwebtoken"; // npm i @types/jsonwebtoken
+import { SignJWT } from "jose"; // Import SignJWT from jose
 
 if (!process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET) {
   throw new Error("AUTH_GITHUB_ID and AUTH_GITHUB_SECRET must be set");
@@ -46,7 +46,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           role: "authenticated",
         };
-        session.supabaseAccessToken = jwt.sign(payload, signingSecret);
+
+        // Use jose to sign the JWT
+        session.supabaseAccessToken = await new SignJWT(payload)
+          .setProtectedHeader({ alg: "HS256" })
+          .setExpirationTime("2h") // Set expiration time as needed
+          .sign(new TextEncoder().encode(signingSecret));
       }
       return session;
     },
