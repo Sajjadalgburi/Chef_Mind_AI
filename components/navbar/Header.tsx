@@ -1,8 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import UserNav from "./UserNav";
+import { auth } from "@/app/auth";
 
-const Header = () => {
+export default async function Header() {
+  const session = await auth();
+
   return (
     <header className="w-full bg-white/80 backdrop-blur-xl border-b border-olive/10 shadow-sm">
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
@@ -19,11 +22,9 @@ const Header = () => {
         </Link>
 
         <div className="flex items-center gap-4">
-          <UserNav />
+          <UserNav session={session} />
         </div>
       </div>
     </header>
   );
-};
-
-export default Header;
+}
