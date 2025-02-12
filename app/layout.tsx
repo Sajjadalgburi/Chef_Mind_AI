@@ -4,7 +4,8 @@ import "./globals.css";
 import Header from "@/components/navbar/Header";
 import Footer from "@/components/Footer";
 import { Analytics } from "@vercel/analytics/react";
-import { SessionProvider } from "next-auth/react";
+import { auth } from "@/app/auth";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,22 +20,23 @@ export const metadata: Metadata = {
     "Turn your fridge into a meal with enhanced LLM and image processing and over million recipes",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const session = await auth();
+
   return (
     <html lang="en">
-      <SessionProvider>
+      <AuthProvider session={session}>
         <body className={inter.className}>
           <Header />
           {children}
           <Footer />
-
           <Analytics />
         </body>
-      </SessionProvider>
+      </AuthProvider>
     </html>
   );
 }
