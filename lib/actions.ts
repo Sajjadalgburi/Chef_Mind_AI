@@ -3,9 +3,9 @@
 import { signIn, signOut } from "@/app/auth";
 
 export const signInWithProvider = async (provider: "github" | "google") => {
-  await signIn(provider, { callbackUrl: "/" });
+  await signIn(provider, { redirectTo: "/" });
 };
 
 export const logout = async () => {
-  await signOut({ redirectTo: "/auth_page" });
+  await signOut({ redirectTo: "/" });
 };
