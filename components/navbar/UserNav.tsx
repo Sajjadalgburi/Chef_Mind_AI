@@ -5,8 +5,28 @@ import Link from "next/link";
 import { logout } from "@/actions";
 import { Session } from "next-auth";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UserNav = ({ session }: { session: Session | null }) => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (session !== undefined) {
+      setIsLoading(false);
+    }
+  }, [session]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-10 w-24" /> {/* For Profile button */}
+        <Skeleton className="h-10 w-24" /> {/* For Public button */}
+        <Skeleton className="h-12 w-12 rounded-full" /> {/* For avatar */}
+      </div>
+    );
+  }
+
   const user = session?.user;
 
   return (
