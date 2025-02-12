@@ -21,6 +21,8 @@ export const protectedRoutes = [
   "/profile",
 ];
 
+export const publicRoutes = ["/public"];
+
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL ?? "",
   token: process.env.UPSTASH_REDIS_REST_TOKEN ?? "",
@@ -47,9 +49,14 @@ export default async function middleware(req: NextRequest) {
   const session = await auth();
   const pathname = nextUrl.pathname;
 
-  const isProtected = protectedRoutes.some((route) => {
-    return pathname.startsWith(route);
-  });
+  const isPublic = publicRoutes.some((route) => pathname.startsWith(route));
+  if (isPublic) {
+    return NextResponse.next();
+  }
+
+  const isProtected = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
   if (isProtected && !session) {
     return NextResponse.redirect(new URL("/auth_page", nextUrl));
@@ -73,7 +80,6 @@ export default async function middleware(req: NextRequest) {
     res.headers.set("X-RateLimit-Remaining", remaining.toString());
     res.headers.set("X-RateLimit-Reset", reset.toString());
 
-    if (!success) return res;
     return res;
   }
 
@@ -81,5 +87,7 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|auth_page|public).*)",
+  ],
 };
