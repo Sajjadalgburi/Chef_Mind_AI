@@ -8,6 +8,7 @@ import { Skeleton } from "./ui/skeleton";
 const AuthForm = () => {
   const [providers, setProviders] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -46,12 +47,18 @@ const AuthForm = () => {
                 signIn(provider.id as string, {
                   redirectTo: "/",
                 });
+                setIsLoggingIn(true);
               }}
-              className={`flex items-center justify-center capitalize gap-3 p-4 border rounded-lg ${
+              disabled={isLoggingIn}
+              className={`flex items-center justify-center capitalize ${
+                isLoggingIn
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:opacity-90 hover:scale-105 cursor-pointer transition-all duration-1000"
+              } gap-3 p-4 border rounded-lg ${
                 provider.name === "Google"
                   ? "bg-white text-black"
                   : "bg-black text-white"
-              } text-lg hover:opacity-90 transition-opacity`}
+              } text-lg  transition-opacity`}
             >
               {provider.name === "Google" ? <FaGoogle /> : <FaGithub />} Sign in
               with {provider.name}
