@@ -2,16 +2,31 @@ import React, { useEffect, useState } from "react";
 import { MealCardsProps } from "@/types";
 import MealCardBody from "./MealCardBody";
 import { LoadingCard } from "./LoadingCard";
-import PlaceholderCardBody from "./PlaceholderCardBody";
-
-// TODO: Remove this in production
-const testing = false;
+import { createManyRecipe, createRecipe } from "@/actions";
+import useAuth from "@/hooks/useAuth";
 
 const MealCards: React.FC<MealCardsProps> = ({
   isMealPlanLoading = true,
   recipes,
 }) => {
   const [visibleSkeletons, setVisibleSkeletons] = useState(1);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const saveRecipes = async () => {
+      if (!recipes || recipes.length === 0 || !user) return;
+
+      if (recipes.length === 0) {
+        await createRecipe(recipes[0]);
+      }
+
+      await createManyRecipe(recipes);
+    };
+
+    if (!isMealPlanLoading && recipes) {
+      saveRecipes();
+    }
+  }, [recipes, isMealPlanLoading, user]);
 
   useEffect(() => {
     if (!recipes && !isMealPlanLoading) return;
@@ -35,11 +50,7 @@ const MealCards: React.FC<MealCardsProps> = ({
             Your Personalized Meal Plan
           </h1>
 
-          {testing ? (
-            <PlaceholderCardBody />
-          ) : (
-            <MealCardBody recipes={recipes} />
-          )}
+          <MealCardBody recipes={recipes} />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
