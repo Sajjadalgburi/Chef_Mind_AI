@@ -2,64 +2,44 @@
 
 import { MealPlanResponse } from "@/types";
 import React, { useState, useEffect } from "react";
-import RecipeCard from "@/components/recipe_card_components/RecipeCard";
+import { getUserRecipes } from "@/actions";
+import useAuth from "@/hooks/useAuth";
+import { getSupabaseClient } from "@/config/supbaseClient";
 
 const Profile = () => {
-  const [savedRecipes, setSavedRecipes] = useState<MealPlanResponse["recipes"]>(
+  // const [dislikedRecipes, setDislikedRecipes] = useState<string[]>([]);
+  const [userRecipes, setUserRecipes] = useState<MealPlanResponse["recipes"]>(
     []
   );
-  const [dislikedRecipes, setDislikedRecipes] = useState<string[]>([]);
 
-  // Load disliked recipes from localStorage on mount
+  // const handleSave = (recipe: MealPlanResponse["recipes"][0]) => {};
+
+  // const handleDislike = (recipeTitle: string) => {};
+
+  const { user, session } = useAuth();
+  const userId = user?.id as string;
+  console.log(userId);
+
   useEffect(() => {
-    const storedSaved = localStorage.getItem("savedRecipes");
-    if (storedSaved) {
-      setSavedRecipes(JSON.parse(storedSaved));
-    }
-  }, []);
+    if (!userId || !session) return;
 
-  const handleSave = (recipe: MealPlanResponse["recipes"][0]) => {
-    setSavedRecipes((prevSaved) => {
-      if (prevSaved.some((r) => r.title === recipe.title)) {
-        // If already saved, do nothing
-        return prevSaved;
-      }
-      const updatedSaved = [...prevSaved, recipe];
-      localStorage.setItem("savedRecipes", JSON.stringify(updatedSaved));
-      return updatedSaved;
-    });
+    const { supabaseAccessToken } = session;
 
-    setDislikedRecipes((prevDisliked) => {
-      if (!prevDisliked.includes(recipe.title)) {
-        return prevDisliked; // If not disliked, do nothing
-      }
-      const updatedDisliked = prevDisliked.filter(
-        (title) => title !== recipe.title
+    if (!supabaseAccessToken || getSupabaseClient(supabaseAccessToken)) return;
+
+    const fetchUserRecipes = async () => {
+      const recipes = await getUserRecipes(
+        userId,
+        getSupabaseClient(supabaseAccessToken)
       );
-      localStorage.setItem("dislikedRecipes", JSON.stringify(updatedDisliked));
-      return updatedDisliked;
-    });
-  };
 
-  const handleDislike = (recipeTitle: string) => {
-    setDislikedRecipes((prevDisliked) => {
-      if (prevDisliked.includes(recipeTitle)) {
-        return prevDisliked; // If already disliked, do nothing
-      }
-      const updatedDisliked = [...prevDisliked, recipeTitle];
-      localStorage.setItem("dislikedRecipes", JSON.stringify(updatedDisliked));
-      return updatedDisliked;
-    });
+      if (!recipes) return;
 
-    setSavedRecipes((prevSaved) => {
-      if (!prevSaved.some((r) => r.title === recipeTitle)) {
-        return prevSaved; // If not saved, do nothing
-      }
-      const updatedSaved = prevSaved.filter((r) => r.title !== recipeTitle);
-      localStorage.setItem("savedRecipes", JSON.stringify(updatedSaved));
-      return updatedSaved;
-    });
-  };
+      setUserRecipes(recipes as unknown as MealPlanResponse["recipes"]);
+    };
+
+    fetchUserRecipes();
+  }, [userId, session]);
 
   return (
     <section className="min-h-screen p-10">
@@ -71,7 +51,7 @@ const Profile = () => {
           Easily access your favorite meal plans anytime.
         </p>
 
-        {!savedRecipes.length ? (
+        {!userRecipes.length ? (
           <div className="mt-10 text-center">
             <h2 className="text-2xl font-semibold text-gray-700">
               No saved meals yet!
@@ -82,16 +62,16 @@ const Profile = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-            {savedRecipes.map((recipe, index) => (
+            {/* {userRecipes.map((recipe, index) => (
               <RecipeCard
                 key={index}
                 recipe={recipe}
-                isSaved={savedRecipes.some((r) => r.title === recipe.title)}
+                isSaved={userRecipes.some((r) => r.title === recipe.title)}
                 isDisliked={dislikedRecipes.includes(recipe.title)}
                 onSave={handleSave}
                 onDislike={handleDislike}
               />
-            ))}
+            ))} */}
           </div>
         )}
       </div>
