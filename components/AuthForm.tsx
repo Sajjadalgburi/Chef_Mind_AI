@@ -1,24 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React from "react";
-import { signInWithProvider } from "@/lib/actions";
+import React, { useEffect, useState } from "react";
+import { getProviders, signIn } from "next-auth/react";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 
-const providers = [
-  {
-    name: "github",
-    logo: <FaGithub />,
-    bgColor: "bg-black",
-    textColor: "text-white",
-  },
-  {
-    name: "google",
-    logo: <FaGoogle />,
-    bgColor: "bg-white",
-    textColor: "text-black",
-  },
-];
-
 const AuthForm = () => {
+  const [providers, setProviders] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getProviders();
+
+      if (!res) return;
+
+      setProviders(res);
+    })();
+  }, []);
+
   return (
     <form className="flex flex-col w-[90%] md:w-[500px] mx-auto bg-white p-8 rounded-lg shadow-2xl">
       <h1 className="text-3xl text-center md:text-4xl font-bold mb-6">
@@ -30,17 +28,28 @@ const AuthForm = () => {
       </p>
 
       <div className="flex flex-col gap-4">
-        {providers.map(({ name, logo, bgColor, textColor }) => (
-          <button
-            key={name}
-            onClick={() =>
-              signInWithProvider(name.toLowerCase() as "github" | "google")
-            }
-            className={`flex items-center justify-center capitalize gap-3 p-4 border rounded-lg ${bgColor} ${textColor} text-lg hover:opacity-90 transition-opacity`}
-          >
-            {logo} Continue with {name}
-          </button>
-        ))}
+        <>
+          {providers &&
+            Object.values(providers).map((provider: any) => (
+              <button
+                type="button"
+                key={provider.name as string}
+                onClick={() => {
+                  signIn(provider.id as string, {
+                    redirectTo: "/",
+                  });
+                }}
+                className={`flex items-center justify-center capitalize gap-3 p-4 border rounded-lg ${
+                  provider.name === "Google"
+                    ? "bg-white text-black"
+                    : "bg-black text-white"
+                } text-lg hover:opacity-90 transition-opacity`}
+              >
+                {provider.name === "Google" ? <FaGoogle /> : <FaGithub />} Sign
+                in with {provider.name}
+              </button>
+            ))}
+        </>
       </div>
     </form>
   );
