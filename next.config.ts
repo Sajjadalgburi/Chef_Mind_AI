@@ -8,6 +8,17 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "oaidalleapiprodscus.blob.core.windows.net",
       },
+      // github remote images
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+
+      // google remote images
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
   },
 };
