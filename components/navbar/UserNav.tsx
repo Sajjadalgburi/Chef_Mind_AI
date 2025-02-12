@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { logout } from "@/lib/actions";
 import { Session } from "next-auth";
+import Image from "next/image";
 
 const UserNav = ({ session }: { session: Session | null }) => {
+  const user = session?.user;
+
   return (
     <>
       {session ? (
@@ -20,6 +23,13 @@ const UserNav = ({ session }: { session: Session | null }) => {
           <Button className="text-sm md:text-xl" onClick={() => logout()}>
             Logout
           </Button>
+          <Image
+            src={user?.image || ""}
+            alt="User Avatar"
+            width={50}
+            height={50}
+            className="rounded-full"
+          />
         </div>
       ) : (
         <div className="flex items-center gap-2">
