@@ -5,7 +5,7 @@ import { FaGoogle, FaGithub } from "react-icons/fa";
 
 const providers = [
   {
-    name: "gitHub",
+    name: "github",
     logo: <FaGithub />,
     bgColor: "bg-black",
     textColor: "text-white",
@@ -30,15 +30,15 @@ const AuthForm = () => {
       </p>
 
       <div className="flex flex-col gap-4">
-        {providers.map((provider) => (
+        {providers.map(({ name, logo, bgColor, textColor }) => (
           <button
-            key={provider.name}
+            key={name}
             onClick={() =>
-              signInWithProvider(provider.name as "github" | "google")
+              signInWithProvider(name.toLowerCase() as "github" | "google")
             }
-            className={`flex items-center justify-center capitalize gap-3 p-4 border rounded-lg ${provider.bgColor} ${provider.textColor} text-lg hover:opacity-90 transition-opacity`}
+            className={`flex items-center justify-center capitalize gap-3 p-4 border rounded-lg ${bgColor} ${textColor} text-lg hover:opacity-90 transition-opacity`}
           >
-            {provider.logo} Continue with {provider.name}
+            {logo} Continue with {name}
           </button>
         ))}
       </div>
