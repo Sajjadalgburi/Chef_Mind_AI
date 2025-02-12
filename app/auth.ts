@@ -12,10 +12,6 @@ if (!process.env.AUTH_GOOGLE_CLIENT_ID || !process.env.AUTH_GOOGLE_SECRET) {
   throw new Error("AUTH_GOOGLE_CLIENT_ID and AUTH_GOOGLE_SECRET must be set");
 }
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY must be set");
-}
-
 if (!process.env.SUPABASE_JWT_SECRET) {
   throw new Error("SUPABASE_JWT_SECRET must be set");
 }
@@ -32,8 +28,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   adapter: SupabaseAdapter({
-    url: process.env.SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    secret: process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!,
   }),
   callbacks: {
     async session({ session, user }) {
