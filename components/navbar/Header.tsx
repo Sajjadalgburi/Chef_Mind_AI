@@ -1,10 +1,12 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import UserNav from "./UserNav";
-import { auth } from "@/app/auth";
+import useAuth from "@/hooks/useAuth";
 
-export default async function Header() {
-  const session = await auth();
+export default function Header() {
+  const { session } = useAuth();
 
   return (
     <header className="w-full bg-white/80 backdrop-blur-xl border-b border-olive/10 shadow-sm">
