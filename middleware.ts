@@ -1,8 +1,7 @@
 import { auth } from "@/app/auth";
-
 import { NextRequest, NextResponse } from "next/server";
 
-export { auth as middleware } from "@/app/auth";
+export { auth } from "@/app/auth";
 
 export const protectedRoutes = [
   "/api/generate-meal-plan",
@@ -10,6 +9,7 @@ export const protectedRoutes = [
   "/api/generate-image",
   "/api/openai-embeddings",
   "/api/pinecone-embeddings",
+  "/profile",
 ];
 
 export default async function middleware(req: NextRequest) {
@@ -18,23 +18,13 @@ export default async function middleware(req: NextRequest) {
 
   const pathname = nextUrl.pathname;
 
-  const isProtected = protectedRoutes.some((r) => {
-    return pathname.startsWith(r);
+  const isProtected = protectedRoutes.some((route) => {
+    return pathname.startsWith(route);
   });
 
   if (isProtected && !session) {
-    return NextResponse.redirect(new URL("/api/auth/signin", nextUrl));
+    return NextResponse.redirect(new URL("/auth_page", nextUrl));
   }
 
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: [
-    "/api/generate-meal-plan",
-    "/api/analyze-image",
-    "/api/generate-image",
-    "/api/openai-embeddings",
-    "/api/pinecone-embeddings",
-  ],
-};
