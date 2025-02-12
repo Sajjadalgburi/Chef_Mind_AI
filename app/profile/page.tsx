@@ -2,7 +2,7 @@
 
 import { MealPlanResponse } from "@/types";
 import React, { useState, useEffect } from "react";
-import { getUserRecipes } from "@/actions";
+import { getUserRecipes, saveRecipe, removeRecipe } from "@/actions";
 import useAuth from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import toast from "react-hot-toast";
@@ -72,6 +72,60 @@ const Profile = () => {
     );
   }
 
+  const handleSave = async (recipe: MealPlanResponse["recipes"][0]) => {
+    if (!userId) {
+      toast.error("Please login to save recipes");
+      return;
+    }
+
+    try {
+      const result = await saveRecipe(recipe, userId);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      // Refresh the recipes list
+      const response = await getUserRecipes(userId, page);
+      if ("error" in response) {
+        throw new Error(response.error);
+      }
+
+      setUserRecipes(response.data as MealPlanResponse["recipes"]);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to save recipe";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleDislike = async (recipeTitle: string) => {
+    if (!userId) {
+      toast.error("Please login to manage recipes");
+      return;
+    }
+
+    try {
+      const result = await removeRecipe(recipeTitle, userId);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      // Refresh the recipes list
+      const response = await getUserRecipes(userId, page);
+      if ("error" in response) {
+        throw new Error(response.error);
+      }
+
+      setUserRecipes(response.data as MealPlanResponse["recipes"]);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to remove recipe";
+      toast.error(errorMessage);
+    }
+  };
+
   return (
     <section className="min-h-screen p-10">
       <div className="max-w-7xl mx-auto">
@@ -97,8 +151,8 @@ const Profile = () => {
                   recipe={recipe}
                   isSaved={true}
                   isDisliked={false}
-                  onSave={() => {}} // Implement remove from saved functionality
-                  onDislike={() => {}} // Implement dislike functionality
+                  onSave={handleSave}
+                  onDislike={handleDislike}
                 />
               ))}
             </div>
