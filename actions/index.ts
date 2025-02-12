@@ -2,9 +2,8 @@
 
 import { signIn, signOut } from "@/app/auth";
 import { MealPlanResponse } from "@/types";
-import { Database } from "@/types/chef_mind_types";
-import { SupabaseClient } from "@supabase/supabase-js";
 import toast from "react-hot-toast";
+import { createClient } from "@/utils/server";
 
 export const signInWithProvider = async (provider: "github" | "google") => {
   await signIn(provider, { redirectTo: "/" });
@@ -14,23 +13,21 @@ export const logout = async () => {
   await signOut({ redirectTo: "/" });
 };
 
-export const createRecipe = async (
-  {
-    title,
-    ingredients,
-    cuisine,
-    difficulty,
-    instructions,
-    cookTime,
-    servings,
-    nutritionalInfo,
-    imageUrl,
-    tips,
-    prepTime,
-    source,
-  }: MealPlanResponse["recipes"][0],
-  supabaseClient: SupabaseClient<Database>
-) => {
+export const createRecipe = async ({
+  title,
+  ingredients,
+  cuisine,
+  difficulty,
+  instructions,
+  cookTime,
+  servings,
+  nutritionalInfo,
+  imageUrl,
+  tips,
+  prepTime,
+  source,
+}: MealPlanResponse["recipes"][0]) => {
+  const supabaseClient = await createClient();
   const { error } = await supabaseClient.from("recipes").insert({
     title,
     ingredients,
@@ -56,22 +53,28 @@ export const createRecipe = async (
 
 export const getUserRecipes = async (
   userId: string,
-  supabaseClient: SupabaseClient<Database>
+  page: number = 1,
+  limit: number = 9
 ) => {
-  if (!supabaseClient) {
-    console.log("Supabase client not found");
-    return;
+  const supabaseClient = await createClient();
+
+  const start = (page - 1) * limit;
+
+  try {
+    const { data, error, count } = await supabaseClient
+      .from("recipes")
+      .select("*", { count: "exact" })
+      .eq("user_id", userId)
+      .range(start, start + limit - 1);
+
+    if (error) {
+      console.error(`Error in getting recipes for user ${userId}:`, error);
+      return { error: error.message };
+    }
+
+    return { data, hasMore: count ? start + limit < count : false };
+  } catch (error) {
+    console.error(`Error in getUserRecipes:`, error);
+    return { error: "Failed to fetch recipes" };
   }
-
-  const { data, error } = await supabaseClient
-    .from("recipes")
-    .select("*")
-    .eq("user_id", userId);
-
-  if (error) {
-    toast.error(`Error in getting recipes for user ${userId}`);
-    return { error: error.message };
-  }
-
-  return data;
 };
