@@ -183,6 +183,65 @@ export type Database = {
   };
   public: {
     Tables: {
+      recipes: {
+        Row: {
+          cookTime: string;
+          cuisine: string;
+          difficulty: string;
+          id: number;
+          imageUrl: string | null;
+          ingredients: Json;
+          instructions: Json;
+          nutritionalInfo: Json;
+          prepTime: string;
+          servings: string;
+          source: string;
+          tips: Json;
+          title: string;
+          user_id: string | null;
+        };
+        Insert: {
+          cookTime: string;
+          cuisine: string;
+          difficulty: string;
+          id?: never;
+          imageUrl?: string | null;
+          ingredients: Json;
+          instructions: Json;
+          nutritionalInfo: Json;
+          prepTime: string;
+          servings: string;
+          source: string;
+          tips: Json;
+          title: string;
+          user_id?: string | null;
+        };
+        Update: {
+          cookTime?: string;
+          cuisine?: string;
+          difficulty?: string;
+          id?: never;
+          imageUrl?: string | null;
+          ingredients?: Json;
+          instructions?: Json;
+          nutritionalInfo?: Json;
+          prepTime?: string;
+          servings?: string;
+          source?: string;
+          tips?: Json;
+          title?: string;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "recipes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       users: {
         Row: {
           email: string | null;
