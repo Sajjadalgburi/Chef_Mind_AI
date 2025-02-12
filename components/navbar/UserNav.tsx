@@ -55,7 +55,7 @@ const UserNav = ({ session }: { session: Session | null }) => {
       ) : (
         <div className="flex items-center gap-2">
           <Button className="text-olive bg-olive/10 text-sm md:text-xl rounded-sm hover:bg-olive/20 transition-colors duration-200">
-            <Link href="/profile">Public</Link>
+            <Link href="/public">Public</Link>
           </Button>
           <Button className="bg-terracotta text-white rounded-sm hover:bg-terracotta/90 text-sm md:text-xl">
             <Link href="/auth_page">Get Started</Link>
