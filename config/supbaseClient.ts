@@ -14,7 +14,7 @@ if (!session) {
 
 const { supabaseAccessToken } = session;
 
-const supabase = createClient<Database>(
+export const supabaseClient = createClient<Database>(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_ANON_KEY!,
   {
@@ -25,5 +25,3 @@ const supabase = createClient<Database>(
     },
   }
 );
-
-export default supabase;
