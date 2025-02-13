@@ -14,16 +14,17 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
         Main Ingredients
       </h4>
       <div className="flex flex-wrap gap-2">
-        {ingredients.slice(0, 4).map((ing, idx) => (
-          <Badge
-            key={idx}
-            variant={ing.required ? "default" : "secondary"}
-            className="text-xs"
-          >
-            {ing.item}
-          </Badge>
-        ))}
-        {ingredients.length > 4 && (
+        {typeof ingredients === "object" &&
+          ingredients.map((ing, idx) => (
+            <Badge
+              key={idx}
+              variant={ing.required ? "default" : "secondary"}
+              className="text-xs"
+            >
+              {ing.item}
+            </Badge>
+          ))}
+        {typeof ingredients === "object" && ingredients.length > 4 && (
           <Badge variant="outline" className="text-xs">
             +{ingredients.length - 4} more
           </Badge>

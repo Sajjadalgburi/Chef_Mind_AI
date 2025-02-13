@@ -9,7 +9,7 @@ import RecipeActions from "./RecipeActions";
 interface RecipeCardProps {
   recipe: MealPlanResponse["recipes"][0];
   isSaved: boolean;
-  isCreatingRecipes?: boolean;
+  isCreatingRecipes: boolean;
   isDisliked: boolean;
   onSave: (recipe: MealPlanResponse["recipes"][0]) => void;
   onDislike: (recipe_title: string) => void;

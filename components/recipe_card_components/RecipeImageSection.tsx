@@ -17,8 +17,8 @@ const RecipeImageSection = ({ recipe }: RecipeImageSectionProps) => {
         <Skeleton className="absolute inset-0 w-full h-full rounded-lg" />
       )}
       <Image
-        src={recipe.imageUrl as string}
-        alt={recipe.title}
+        src={(recipe.imageUrl as string) || "/images/placeholder-image.jpg"}
+        alt={recipe?.title}
         className={`w-full h-full object-cover ${
           imageLoading ? "opacity-0" : "opacity-100"
         }`}
