@@ -124,7 +124,7 @@ export const getUserRecipes = async (
 
   try {
     const { data, error, count } = await supabaseClient
-      .from("recipes")
+      .from("saved_recipes")
       .select("*", { count: "exact" })
       .eq("user_id", userId)
       .range(start, start + limit - 1);
@@ -134,7 +134,7 @@ export const getUserRecipes = async (
       return { error: error.message };
     }
 
-    return { data, hasMore: count ? start + limit < count : false };
+    return { data, hasMore: count ? start + limit < count : false, error };
   } catch (error) {
     console.error(`Error in getUserRecipes:`, error);
     return { error: "Failed to fetch recipes" };
