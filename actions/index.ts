@@ -3,7 +3,6 @@
 import { signIn, signOut } from "@/app/auth";
 import { MealPlanResponse } from "@/types";
 import { createClient } from "@/utils/server";
-import { toast } from "react-hot-toast";
 
 export const signInWithProvider = async (provider: "github" | "google") => {
   await signIn(provider, { redirectTo: "/" });
@@ -11,6 +10,22 @@ export const signInWithProvider = async (provider: "github" | "google") => {
 
 export const logout = async () => {
   await signOut({ redirectTo: "/" });
+};
+
+// get a single recipe from the saved_recipes table
+export const getSingleRecipe = async (recipeId: number) => {
+  const supabaseClient = await createClient();
+
+  const { data, error } = await supabaseClient
+    .from("saved_recipes")
+    .select("*")
+    .eq("recipe_id", recipeId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { data, success: true };
 };
 
 export const createManyRecipe = async (
@@ -66,6 +81,11 @@ export const createManyRecipe = async (
     console.error("Error inserting recipes:", error);
     return { error: error.message };
   }
+
+  console.log(
+    "----recived data-----",
+    data.map((recipe) => ({ title: recipe.title, id: recipe.id }))
+  );
 
   return { message: "Recipes created successfully", data };
 };
@@ -133,19 +153,26 @@ export const saveRecipe = async (userId: string, recipeId: number) => {
   }
 
   try {
+    // Check if recipe is already saved
+    const { data } = await getSingleRecipe(recipeId);
+
+    if (data && data.length > 0) {
+      return { error: "Recipe already saved" };
+    }
+
+    // If not saved, proceed with saving
     const { error } = await supabaseClient.from("saved_recipes").insert({
       user_id: userId,
       recipe_id: recipeId,
     });
 
     if (error) {
-      toast.error("Error saving recipe");
       return { error: error.message };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Error in saveRecipe:", error);
+    console.error("Failed to save recipe", error);
     return { error: "Failed to save recipe" };
   }
 };
@@ -162,22 +189,31 @@ export const removeRecipe = async (recipeId: number, userId: string) => {
   }
 
   try {
+    // Check if the recipe exists before trying to delete
+    const { data, error: recipeError } = await getSingleRecipe(recipeId);
+
+    if (recipeError) {
+      return { error: recipeError };
+    }
+
+    if (!data || data.length === 0) {
+      return { error: "Recipe not found in saved recipes" };
+    }
+
     const { error } = await supabaseClient
       .from("saved_recipes")
       .delete()
-      .match({ recipe_id: recipeId, user_id: userId })
+      .eq("recipe_id", recipeId)
       .eq("user_id", userId);
 
     if (error) {
-      toast.error("Error removing recipe");
       return { error: error.message };
     }
 
-    toast.success("Recipe removed successfully");
+    console.log("recipe removed successfully");
     return { success: true };
   } catch (error) {
     console.error("Error in removeRecipe:", error);
-    toast.error("Failed to remove recipe");
     return { error: "Failed to remove recipe" };
   }
 };
