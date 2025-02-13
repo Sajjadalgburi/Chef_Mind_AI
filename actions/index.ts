@@ -82,11 +82,6 @@ export const createManyRecipe = async (
     return { error: error.message };
   }
 
-  console.log(
-    "----recived data-----",
-    data.map((recipe) => ({ title: recipe.title, id: recipe.id }))
-  );
-
   return { message: "Recipes created successfully", data };
 };
 
@@ -243,17 +238,6 @@ export const removeRecipe = async (recipeId: number, userId: string) => {
   }
 
   try {
-    // Check if the recipe exists before trying to delete
-    const { data, error: recipeError } = await getSingleRecipe(recipeId);
-
-    if (recipeError) {
-      return { error: recipeError };
-    }
-
-    if (!data || data.length === 0) {
-      return { error: "Recipe not found in saved recipes" };
-    }
-
     const { error } = await supabaseClient
       .from("saved_recipes")
       .delete()
@@ -263,8 +247,8 @@ export const removeRecipe = async (recipeId: number, userId: string) => {
     if (error) {
       return { error: error.message };
     }
+    console.log("got here");
 
-    console.log("recipe removed successfully");
     return { success: true };
   } catch (error) {
     console.error("Error in removeRecipe:", error);
