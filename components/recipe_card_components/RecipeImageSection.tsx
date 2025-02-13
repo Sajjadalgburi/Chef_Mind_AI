@@ -17,6 +17,7 @@ const RecipeImageSection = ({ recipe }: RecipeImageSectionProps) => {
         <Skeleton className="absolute inset-0 w-full h-full rounded-lg" />
       )}
       <Image
+        priority
         src={(recipe.imageUrl as string) || "/images/placeholder-image.jpg"}
         alt={recipe?.title}
         className={`w-full h-full object-cover ${
