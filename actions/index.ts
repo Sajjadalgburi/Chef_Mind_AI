@@ -14,43 +14,81 @@ export const logout = async () => {
 };
 
 export const createManyRecipe = async (
-  recipes: MealPlanResponse["recipes"]
+  recipes: MealPlanResponse["recipes"],
+  userId: string
 ) => {
+  if (!Array.isArray(recipes) || recipes.length === 0) {
+    return { error: "Invalid recipes array" };
+  }
+
   const supabaseClient = await createClient();
 
-  const { error } = await supabaseClient.from("recipes").insert(
-    recipes.map((recipe) => ({
-      title: recipe.title,
-      ingredients: recipe.ingredients,
-      cuisine: recipe.cuisine,
-      difficulty: recipe.difficulty,
-      instructions: recipe.instructions,
-      cookTime: recipe.cookTime,
-      servings: recipe.servings,
-    }))
-  );
+  if (!userId) {
+    return { error: "User ID is required" };
+  }
+
+  const { data, error } = await supabaseClient
+    .from("recipes")
+    .insert(
+      recipes.map((recipe) => ({
+        user_id: userId,
+        title: recipe.title,
+        cuisine: recipe.cuisine,
+        difficulty: recipe.difficulty,
+        prepTime: String(recipe.prepTime),
+        cookTime: String(recipe.cookTime),
+        servings: String(recipe.servings),
+        ingredients: JSON.stringify(
+          recipe.ingredients.map((ingredient) => ({
+            item: ingredient.item,
+            amount: ingredient.amount,
+            required: ingredient.required,
+            substitute: ingredient.substitute,
+          }))
+        ),
+        instructions: JSON.stringify(
+          recipe.instructions.map((instruction) => ({
+            instruction: instruction as string,
+          }))
+        ),
+        nutritionalInfo: JSON.stringify({
+          calories: recipe.nutritionalInfo.calories as string,
+          protein: recipe.nutritionalInfo.protein as string,
+          carbs: recipe.nutritionalInfo.carbs as string,
+          fat: recipe.nutritionalInfo.fat as string,
+        }),
+        imageUrl: recipe.imageUrl,
+        tips: JSON.stringify(
+          recipe.tips.map((tip) => ({
+            tip: tip as string,
+          }))
+        ),
+        source: recipe.source,
+      }))
+    )
+    .eq("user_id", userId);
 
   if (error) {
     return { error: error.message };
   }
 
-  return "Recipes created successfully";
+  return { message: "Recipes created successfully", data };
 };
 
 export const createRecipe = async (recipe: MealPlanResponse["recipes"][0]) => {
   const supabaseClient = await createClient();
   const { error } = await supabaseClient.from("recipes").insert({
     title: recipe.title,
-    ingredients: recipe.ingredients,
     cuisine: recipe.cuisine,
     difficulty: recipe.difficulty,
-    instructions: recipe.instructions,
-    cookTime: recipe.cookTime,
-    servings: recipe.servings,
-    nutritionalInfo: recipe.nutritionalInfo,
+    prepTime: String(recipe.prepTime),
+    cookTime: String(recipe.cookTime),
+    servings: String(recipe.servings),
+    ingredients: JSON.stringify(recipe.ingredients),
+    instructions: JSON.stringify(recipe.instructions),
+    nutritionalInfo: JSON.stringify(recipe.nutritionalInfo),
     imageUrl: recipe.imageUrl,
-    tips: recipe.tips,
-    prepTime: recipe.prepTime,
+    tips: JSON.stringify(recipe.tips),
     source: recipe.source,
   });
 
@@ -67,7 +105,6 @@ export const getUserRecipes = async (
   limit: number = 9
 ) => {
   const supabaseClient = await createClient();
-
   const start = (page - 1) * limit;
 
   try {
@@ -95,11 +132,29 @@ export const saveRecipe = async (
 ) => {
   const supabaseClient = await createClient();
 
+  if (!userId) {
+    return { error: "User ID is required" };
+  }
+
   try {
-    const { error } = await supabaseClient.from("recipes").insert({
-      ...recipe,
-      user_id: userId,
-    });
+    const { error } = await supabaseClient
+      .from("recipes")
+      .insert({
+        user_id: userId,
+        title: recipe.title,
+        cuisine: recipe.cuisine,
+        difficulty: recipe.difficulty,
+        prepTime: String(recipe.prepTime),
+        cookTime: String(recipe.cookTime),
+        servings: String(recipe.servings),
+        ingredients: JSON.stringify(recipe.ingredients),
+        instructions: JSON.stringify(recipe.instructions),
+        nutritionalInfo: JSON.stringify(recipe.nutritionalInfo),
+        imageUrl: recipe.imageUrl,
+        tips: JSON.stringify(recipe.tips),
+        source: recipe.source,
+      })
+      .eq("user_id", userId);
 
     if (error) {
       toast.error("Error saving recipe");
@@ -120,7 +175,7 @@ export const removeRecipe = async (recipeTitle: string, userId: string) => {
 
   try {
     const { error } = await supabaseClient
-      .from("recipes")
+      .from("saved_recipes")
       .delete()
       .match({ title: recipeTitle, user_id: userId });
 
