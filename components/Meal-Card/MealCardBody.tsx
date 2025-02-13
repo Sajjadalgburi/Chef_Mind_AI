@@ -80,7 +80,9 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
           >
             <div className="relative h-48 w-full rounded-lg overflow-hidden">
               <Image
-                src={recipe.imageUrl as string}
+                src={
+                  (recipe.imageUrl as string) || "/images/placeholder-image.jpg"
+                }
                 alt={recipe.title}
                 className="w-full h-full object-cover"
                 width={400}
@@ -226,6 +228,7 @@ const MealCardBody: React.FC<Props> = ({ recipes }) => {
 
             <Link
               href={
+                typeof recipe.source === "string" &&
                 recipe.source.startsWith("http")
                   ? recipe.source
                   : `https://${recipe.source}`
