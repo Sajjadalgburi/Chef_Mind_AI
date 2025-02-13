@@ -62,8 +62,18 @@ const Profile = () => {
             {}
           );
 
+          // Create a map of saved recipes, setting all to true
+          const savedMap = normalizedData.reduce(
+            (acc: { [key: string]: boolean }, recipe) => {
+              acc[recipe.title] = true;
+              return acc;
+            },
+            {}
+          );
+
           setRecipeIds(idMap);
           setUserRecipes((prev) => [...prev, ...normalizedData]);
+          setSavedRecipes((prev) => ({ ...prev, ...savedMap }));
           setRecievedResponse(true);
           setIsCreatingRecipes(false);
           setHasMore(hasMore || false);
@@ -178,8 +188,6 @@ const Profile = () => {
       toast.error(errorMessage);
     }
   };
-
-  console.log("----userRecipes----", userRecipes);
 
   return (
     <section className="min-h-screen p-10">
