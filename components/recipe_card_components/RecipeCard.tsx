@@ -47,7 +47,7 @@ const RecipeCard = ({
 
       <Link
         href={
-          recipe.source.startsWith("http")
+          typeof recipe.source === "string" && recipe.source.startsWith("http")
             ? recipe.source
             : `https://${recipe.source}`
         }
