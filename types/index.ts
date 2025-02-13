@@ -16,6 +16,7 @@ export type IngredientsType = [
 export type MealCardsProps = {
   isMealPlanLoading: boolean;
   recipes: MealPlanResponse["recipes"];
+  setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
 };
 
 // Type definition for a recipe
