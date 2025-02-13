@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 const MealCards: React.FC<MealCardsProps> = ({
   isMealPlanLoading = true,
   recipes,
+  setRecipes,
 }) => {
   const [visibleSkeletons, setVisibleSkeletons] = useState(1);
   const { user } = useAuth();
@@ -142,7 +143,7 @@ const MealCards: React.FC<MealCardsProps> = ({
       const { success, error } = await removeRecipe(recipeId, userId);
 
       if (error || !success) {
-        toast.error("Could not dislike recipe");
+        toast.error(error);
         return;
       }
 
@@ -158,6 +159,10 @@ const MealCards: React.FC<MealCardsProps> = ({
           [recipe_title]: false,
         }));
       }
+
+      setRecipes((prev) =>
+        prev.filter((recipe) => recipe.title !== recipe_title)
+      );
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to remove recipe";
