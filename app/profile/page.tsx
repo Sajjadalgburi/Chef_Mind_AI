@@ -17,10 +17,18 @@ const Profile = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
   const { user, session } = useAuth();
   const router = useRouter();
   const userId = user?.id;
+  const [isCreatingRecipes, setIsCreatingRecipes] = useState(true);
+  const [recipeIds, setRecipeIds] = useState<{ [key: string]: number }>({});
+  const [savedRecipes, setSavedRecipes] = useState<{ [key: string]: boolean }>(
+    {}
+  );
+  const [dislikedRecipes, setDislikedRecipes] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [recievedResponse, setRecievedResponse] = useState(false);
 
   useEffect(() => {
     if (!userId || !session) {
@@ -28,31 +36,51 @@ const Profile = () => {
       return;
     }
 
-    const fetchUserRecipes = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    if (recievedResponse === false) {
+      setTimeout(async () => {
+        const fetchUserRecipes = async () => {
+          try {
+            setLoading(true);
+            setError(null);
 
-        const response = await getUserRecipes(userId, page);
+            const { data, hasMore, error } = await getUserRecipes(userId, page);
 
-        if ("error" in response) {
-          throw new Error(response.error);
-        }
+            if (error || !data) {
+              throw new Error(error);
+            }
 
-        setUserRecipes(response.data as MealPlanResponse["recipes"]);
-        setHasMore(response.hasMore);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch recipes";
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
+            const idMap = data.reduce(
+              (
+                acc: { [key: string]: number },
+                recipe: { id: number; title: string }
+              ) => {
+                acc[recipe.title] = recipe.id;
+                return acc;
+              },
+              {}
+            );
 
-    fetchUserRecipes();
-  }, [userId, session, page, router]);
+            setRecipeIds(idMap);
+            setUserRecipes(data as MealPlanResponse["recipes"]);
+            setRecievedResponse(true);
+            setIsCreatingRecipes(false);
+
+            if (hasMore) {
+              setHasMore(hasMore);
+            }
+          } catch (err) {
+            const errorMessage =
+              err instanceof Error ? err.message : "Failed to fetch recipes";
+            setError(errorMessage);
+            toast.error(errorMessage);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchUserRecipes();
+      }, 2000);
+    }
+  }, [userId, session, page, router, recievedResponse]);
 
   const loadMoreRecipes = () => {
     setPage((prev) => prev + 1);
@@ -78,20 +106,32 @@ const Profile = () => {
       return;
     }
 
+    const recipeId = recipeIds[recipe.title];
+    if (!recipeId) {
+      toast.error("Recipe ID not found");
+      return;
+    }
+
     try {
-      const result = await saveRecipe(recipe, userId);
+      const { error, success } = await saveRecipe(userId, recipeId);
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (error || !success) {
+        toast.error(error);
+        return;
       }
 
-      // Refresh the recipes list
-      const response = await getUserRecipes(userId, page);
-      if ("error" in response) {
-        throw new Error(response.error);
-      }
+      setSavedRecipes((prev) => ({
+        ...prev,
+        [recipe.title]: !prev[recipe.title],
+      }));
 
-      setUserRecipes(response.data as MealPlanResponse["recipes"]);
+      // If recipe was disliked, remove dislike when liking
+      if (dislikedRecipes[recipe.title]) {
+        setDislikedRecipes((prev) => ({
+          ...prev,
+          [recipe.title]: false,
+        }));
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to save recipe";
@@ -99,26 +139,42 @@ const Profile = () => {
     }
   };
 
-  const handleDislike = async (recipeTitle: string) => {
+  const handleDislike = async (recipe_title: string) => {
     if (!userId) {
       toast.error("Please login to manage recipes");
       return;
     }
 
+    const recipeId = recipeIds[recipe_title];
+    if (!recipeId) {
+      toast.error("Recipe ID not found");
+      return;
+    }
+
     try {
-      const result = await removeRecipe(recipeTitle, userId);
+      const { success, error } = await removeRecipe(recipeId, userId);
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (error || !success) {
+        toast.error(error);
+        return;
       }
 
-      // Refresh the recipes list
-      const response = await getUserRecipes(userId, page);
-      if ("error" in response) {
-        throw new Error(response.error);
+      setDislikedRecipes((prev) => ({
+        ...prev,
+        [recipe_title]: !prev[recipe_title],
+      }));
+
+      // If recipe was liked, remove like when disliking
+      if (savedRecipes[recipe_title]) {
+        setSavedRecipes((prev) => ({
+          ...prev,
+          [recipe_title]: false,
+        }));
       }
 
-      setUserRecipes(response.data as MealPlanResponse["recipes"]);
+      setUserRecipes((prev) =>
+        prev.filter((recipe) => recipe.title !== recipe_title)
+      );
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to remove recipe";
@@ -149,9 +205,10 @@ const Profile = () => {
                 <RecipeCard
                   key={`${recipe.title}-${index}`}
                   recipe={recipe}
-                  isSaved={true}
-                  isDisliked={false}
+                  isSaved={savedRecipes[recipe.title]}
+                  isDisliked={dislikedRecipes[recipe.title]}
                   onSave={handleSave}
+                  isCreatingRecipes={isCreatingRecipes}
                   onDislike={handleDislike}
                 />
               ))}
