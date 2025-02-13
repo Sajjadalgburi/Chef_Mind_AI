@@ -66,11 +66,14 @@ export const createManyRecipe = async (
         source: recipe.source,
       }))
     )
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .select("id, title");
 
   if (error) {
     return { error: error.message };
   }
+
+  console.log("------ data ------\n", data);
 
   return { message: "Recipes created successfully", data };
 };
@@ -126,33 +129,23 @@ export const getUserRecipes = async (
   }
 };
 
-export const saveRecipe = async (
-  recipe: MealPlanResponse["recipes"][0],
-  userId: string
-) => {
+export const saveRecipe = async (userId: string, recipeId: number) => {
   const supabaseClient = await createClient();
 
   if (!userId) {
     return { error: "User ID is required" };
   }
 
+  if (!recipeId) {
+    return { error: "Recipe ID is required" };
+  }
+
   try {
     const { error } = await supabaseClient
-      .from("recipes")
+      .from("saved_recipes")
       .insert({
         user_id: userId,
-        title: recipe.title,
-        cuisine: recipe.cuisine,
-        difficulty: recipe.difficulty,
-        prepTime: String(recipe.prepTime),
-        cookTime: String(recipe.cookTime),
-        servings: String(recipe.servings),
-        ingredients: JSON.stringify(recipe.ingredients),
-        instructions: JSON.stringify(recipe.instructions),
-        nutritionalInfo: JSON.stringify(recipe.nutritionalInfo),
-        imageUrl: recipe.imageUrl,
-        tips: JSON.stringify(recipe.tips),
-        source: recipe.source,
+        recipe_id: recipeId,
       })
       .eq("user_id", userId);
 
@@ -170,14 +163,23 @@ export const saveRecipe = async (
   }
 };
 
-export const removeRecipe = async (recipeTitle: string, userId: string) => {
+export const removeRecipe = async (recipeId: number, userId: string) => {
   const supabaseClient = await createClient();
+
+  if (!userId) {
+    return { error: "User ID is required" };
+  }
+
+  if (!recipeId) {
+    return { error: "Recipe ID is required" };
+  }
 
   try {
     const { error } = await supabaseClient
       .from("saved_recipes")
       .delete()
-      .match({ title: recipeTitle, user_id: userId });
+      .match({ recipe_id: recipeId, user_id: userId })
+      .eq("user_id", userId);
 
     if (error) {
       toast.error("Error removing recipe");
