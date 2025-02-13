@@ -36,48 +36,45 @@ const Profile = () => {
       return;
     }
 
-    if (recievedResponse === false) {
+    if (!recievedResponse) {
       setTimeout(async () => {
-        const fetchUserRecipes = async () => {
-          try {
-            setLoading(true);
-            setError(null);
+        try {
+          setLoading(true);
+          setError(null);
 
-            const { data, hasMore, error } = await getUserRecipes(userId, page);
+          const { data, hasMore, error } = await getUserRecipes(userId, page);
 
-            if (error || !data) {
-              throw new Error(error);
-            }
-
-            const idMap = data.reduce(
-              (
-                acc: { [key: string]: number },
-                recipe: { id: number; title: string }
-              ) => {
-                acc[recipe.title] = recipe.id;
-                return acc;
-              },
-              {}
-            );
-
-            setRecipeIds(idMap);
-            setUserRecipes(data as MealPlanResponse["recipes"]);
-            setRecievedResponse(true);
-            setIsCreatingRecipes(false);
-
-            if (hasMore) {
-              setHasMore(hasMore);
-            }
-          } catch (err) {
-            const errorMessage =
-              err instanceof Error ? err.message : "Failed to fetch recipes";
-            setError(errorMessage);
-            toast.error(errorMessage);
-          } finally {
-            setLoading(false);
+          if (error || !data) {
+            throw new Error(error);
           }
-        };
-        fetchUserRecipes();
+
+          // Ensure `data` is always an array
+          const normalizedData = Array.isArray(data) ? data : [data];
+
+          const idMap = normalizedData.reduce(
+            (
+              acc: { [key: string]: number },
+              recipe: { id: number; title: string }
+            ) => {
+              acc[recipe.title] = recipe.id;
+              return acc;
+            },
+            {}
+          );
+
+          setRecipeIds(idMap);
+          setUserRecipes((prev) => [...prev, ...normalizedData]);
+          setRecievedResponse(true);
+          setIsCreatingRecipes(false);
+          setHasMore(hasMore || false);
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to fetch recipes";
+          setError(errorMessage);
+          toast.error(errorMessage);
+        } finally {
+          setLoading(false);
+        }
       }, 2000);
     }
   }, [userId, session, page, router, recievedResponse]);
@@ -182,6 +179,8 @@ const Profile = () => {
     }
   };
 
+  console.log("----userRecipes----", userRecipes);
+
   return (
     <section className="min-h-screen p-10">
       <div className="max-w-7xl mx-auto">
@@ -194,13 +193,17 @@ const Profile = () => {
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(3)].map((_, i) => (
               <Skeleton key={i} className="h-96 w-full" />
             ))}
           </div>
         ) : userRecipes.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+            <div
+              className={`grid grid-cols-1 ${
+                userRecipes.length > 1 ? "lg:grid-cols-3" : "max-w-md mx-auto"
+              } gap-6 mt-10`}
+            >
               {userRecipes.map((recipe, index) => (
                 <RecipeCard
                   key={`${recipe.title}-${index}`}
