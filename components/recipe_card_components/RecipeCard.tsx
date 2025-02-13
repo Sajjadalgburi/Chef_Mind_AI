@@ -12,7 +12,7 @@ interface RecipeCardProps {
   isCreatingRecipes?: boolean;
   isDisliked: boolean;
   onSave: (recipe: MealPlanResponse["recipes"][0]) => void;
-  onDislike: (recipeTitle: string) => void;
+  onDislike: (recipe_title: string) => void;
 }
 
 const RecipeCard = ({
