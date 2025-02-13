@@ -114,27 +114,81 @@ export const createRecipe = async (recipe: MealPlanResponse["recipes"][0]) => {
   return "Recipe created successfully";
 };
 
+export const getAllRelatedRecipes = async (userId: string) => {
+  const supabaseClient = await createClient();
+
+  if (!userId) {
+    return { error: "User ID is required" };
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("saved_recipes")
+      .select("recipe_id")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error(`Error in getting recipe IDs for user ${userId}:`, error);
+      return { error: error.message };
+    }
+
+    if (!data || data.length === 0) {
+      return { data: [], success: true };
+    }
+
+    const recipeIds = data.map((recipe) => recipe.recipe_id);
+
+    const { data: recipes, error: recipeError } = await supabaseClient
+      .from("recipes")
+      .select("*")
+      .in("id", recipeIds);
+
+    if (recipeError) {
+      console.error(
+        `Error in getting recipes for user ${userId}:`,
+        recipeError
+      );
+      return { error: recipeError.message };
+    }
+
+    return { data: recipes, success: true };
+  } catch (error) {
+    console.error(`Error in getAllRelatedRecipes:`, error);
+    return { error: "Failed to fetch related recipes" };
+  }
+};
+
 export const getUserRecipes = async (
   userId: string,
   page: number = 1,
   limit: number = 9
 ) => {
-  const supabaseClient = await createClient();
   const start = (page - 1) * limit;
 
+  if (!userId) {
+    return { error: "User ID is required" };
+  }
+
   try {
-    const { data, error, count } = await supabaseClient
-      .from("saved_recipes")
-      .select("*", { count: "exact" })
-      .eq("user_id", userId)
-      .range(start, start + limit - 1);
+    const { data: allRecipes, error } = await getAllRelatedRecipes(userId);
 
     if (error) {
-      console.error(`Error in getting recipes for user ${userId}:`, error);
-      return { error: error.message };
+      return { error };
     }
 
-    return { data, hasMore: count ? start + limit < count : false, error };
+    if (!Array.isArray(allRecipes) || allRecipes.length === 0) {
+      return { data: [], hasMore: false };
+    }
+
+    // Calculate pagination
+    const paginatedRecipes = allRecipes.slice(start, start + limit);
+    const hasMore = start + limit < allRecipes.length;
+
+    return {
+      data: paginatedRecipes,
+      hasMore,
+      total: allRecipes.length,
+    };
   } catch (error) {
     console.error(`Error in getUserRecipes:`, error);
     return { error: "Failed to fetch recipes" };
