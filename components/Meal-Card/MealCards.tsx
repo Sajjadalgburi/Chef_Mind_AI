@@ -19,6 +19,8 @@ const MealCards: React.FC<MealCardsProps> = ({
   const { user } = useAuth();
   const [isCreatingRecipes, setIsCreatingRecipes] = useState(true);
   const [recipeIds, setRecipeIds] = useState<{ [key: string]: number }>({});
+  const [isSaved, setIsSaved] = useState(false);
+  const [recievedResponse, setRecievedResponse] = useState(false);
 
   const userId = user?.id;
 
@@ -26,38 +28,51 @@ const MealCards: React.FC<MealCardsProps> = ({
     const saveRecipes = async () => {
       if (!recipes || recipes.length === 0 || !user || !userId) return;
 
-      try {
-        const { data, error } = await createManyRecipe(recipes, userId);
+      // Add a delay to ensure recipes are displayed first
 
-        if (error || !data) {
-          throw new Error(error);
-        }
+      // if did not recieve response, then allow to save recipes in the database
+      if (recievedResponse === false) {
+        setTimeout(async () => {
+          try {
+            const { data, error } = await createManyRecipe(recipes, userId);
 
-        const idMap = data.reduce(
-          (
-            acc: { [key: string]: number },
-            recipe: { id: number; title: string }
-          ) => {
-            acc[recipe.title] = recipe.id;
-            return acc;
-          },
-          {}
-        );
-        setRecipeIds(idMap);
+            if (error || !data) {
+              throw new Error(error);
+            }
 
-        setIsCreatingRecipes(false);
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Failed to save recipes"
-        );
-        setIsCreatingRecipes(false);
+            const idMap = data.reduce(
+              (
+                acc: { [key: string]: number },
+                recipe: { id: number; title: string }
+              ) => {
+                acc[recipe.title] = recipe.id;
+                return acc;
+              },
+              {}
+            );
+            setRecievedResponse(true); // set to true to prevent from saving recipes in the database again
+            setRecipeIds(idMap);
+            setIsCreatingRecipes(false);
+            toast.success("Recipes saved successfully!");
+          } catch (error) {
+            toast.error(
+              error instanceof Error ? error.message : "Failed to save recipes"
+            );
+            setIsCreatingRecipes(false);
+          }
+        }, 2500); // 2 second delay
       }
     };
 
-    if (!isMealPlanLoading && recipes?.length) {
+    // Only run when recipes are loaded and not empty
+    if (
+      !isMealPlanLoading &&
+      recipes?.length &&
+      recipes.every((recipe) => recipe.title)
+    ) {
       saveRecipes();
     }
-  }, [recipes, isMealPlanLoading, user, userId]);
+  }, [recipes, isMealPlanLoading, user, userId, recievedResponse]);
 
   useEffect(() => {
     if (!recipes && !isMealPlanLoading) return;
@@ -74,6 +89,9 @@ const MealCards: React.FC<MealCardsProps> = ({
   }, [isMealPlanLoading, recipes]);
 
   const handleSave = async (recipe: MealPlanResponse["recipes"][0]) => {
+    // if the recipe is already saved, then do not save it again
+    if (!isSaved) return; // isSaved = true is same as !isSaved
+
     if (!userId) {
       toast.error("Please login to save recipes");
       return;
@@ -86,17 +104,16 @@ const MealCards: React.FC<MealCardsProps> = ({
     }
 
     try {
-      const result = await saveRecipe(userId, recipeId);
+      const { success, error } = await saveRecipe(userId, recipeId);
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (error || !success) {
+        throw new Error(error);
       }
 
       // Refresh the recipes list
-      const response = await getUserRecipes(userId);
-      if ("error" in response) {
-        throw new Error(response.error);
-      }
+      // const response = await getUserRecipes(userId);
+
+      setIsSaved(true);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to save recipe";
@@ -139,22 +156,24 @@ const MealCards: React.FC<MealCardsProps> = ({
   return (
     <div className="gap-8 mx-auto px-4 mb-[5rem] sm:mb-0 py-6 sm:py-[5rem] flex flex-col items-center">
       {!isMealPlanLoading ? (
-        <div className="w-full max-w-[80vw]">
-          <h1 className="md:text-6xl text-left mb-8 font-bold text-gray-800">
+        <>
+          <h1 className="md:text-6xl text-left font-bold text-gray-800">
             Your Personalized Meal Plan
-          </h1>
-          {recipes.map((recipe, index) => (
-            <RecipeCard
-              key={`${recipe.title}-${index}`}
-              recipe={recipe}
-              isCreatingRecipes={isCreatingRecipes}
-              isSaved={true}
-              isDisliked={false}
-              onSave={handleSave}
-              onDislike={handleDislike}
-            />
-          ))}{" "}
-        </div>
+          </h1>{" "}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+            {recipes.map((recipe, index) => (
+              <RecipeCard
+                key={`${recipe.title}-${index}`}
+                recipe={recipe}
+                isCreatingRecipes={isCreatingRecipes}
+                isSaved={isSaved}
+                isDisliked={false}
+                onSave={handleSave}
+                onDislike={handleDislike}
+              />
+            ))}{" "}
+          </div>{" "}
+        </>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {Array.from({ length: visibleSkeletons }).map((_, index) => (
