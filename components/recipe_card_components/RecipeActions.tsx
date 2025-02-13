@@ -34,10 +34,13 @@ const RecipeActions = ({
         ) : (
           <>
             <button
-              onClick={() => onSave(recipe)}
+              onClick={isSaved ? undefined : () => onSave(recipe)}
+              disabled={isSaved}
               className={`flex gap-3 justify-center items-center p-2 ${
-                isSaved ? "bg-blue-200" : "bg-blue-100"
-              } rounded-lg shadow-md transform transition-all duration-200 hover:scale-105`}
+                isSaved
+                  ? "bg-blue-200 opacity-50 hover:cursor-not-allowed"
+                  : "bg-blue-100 hover:scale-105"
+              } rounded-lg shadow-md transform transition-all duration-200`}
             >
               {isSaved ? (
                 <>
@@ -72,9 +75,15 @@ const RecipeActions = ({
               ) : (
                 <>
                   <AiOutlineDislike className="h-6 w-6" />
-                  <span>
-                    <strong>Dislike</strong>
-                  </span>
+                  {isSaved ? (
+                    <span>
+                      <strong>Remove</strong>
+                    </span>
+                  ) : (
+                    <span>
+                      <strong>Dislike</strong>
+                    </span>
+                  )}
                 </>
               )}
             </button>
