@@ -3,7 +3,6 @@ import { MealCardsProps, MealPlanResponse } from "@/types";
 import { LoadingCard } from "./LoadingCard";
 import {
   createManyRecipe,
-  createRecipe,
   getUserRecipes,
   removeRecipe,
   saveRecipe,
@@ -18,27 +17,34 @@ const MealCards: React.FC<MealCardsProps> = ({
 }) => {
   const [visibleSkeletons, setVisibleSkeletons] = useState(1);
   const { user } = useAuth();
-
   const [isCreatingRecipes, setIsCreatingRecipes] = useState(true);
 
   const userId = user?.id;
+
   useEffect(() => {
     const saveRecipes = async () => {
-      if (!recipes || recipes.length === 0 || !user) return;
+      if (!recipes || recipes.length === 0 || !user || !userId) return;
 
-      if (recipes.length === 0) {
-        await createRecipe(recipes[0]);
+      try {
+        const result = await createManyRecipe(recipes, userId);
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        setIsCreatingRecipes(false);
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to save recipes"
+        );
         setIsCreatingRecipes(false);
       }
-
-      await createManyRecipe(recipes);
-      setIsCreatingRecipes(false);
     };
 
-    if (!isMealPlanLoading && recipes) {
+    if (!isMealPlanLoading && recipes?.length) {
       saveRecipes();
     }
-  }, [recipes, isMealPlanLoading, user]);
+  }, [recipes, isMealPlanLoading, user, userId]);
 
   useEffect(() => {
     if (!recipes && !isMealPlanLoading) return;
@@ -103,6 +109,7 @@ const MealCards: React.FC<MealCardsProps> = ({
       toast.error(errorMessage);
     }
   };
+
   return (
     <div className="gap-8 mx-auto px-4 mb-[5rem] sm:mb-0 py-6 sm:py-[5rem] flex flex-col items-center">
       {!isMealPlanLoading ? (
