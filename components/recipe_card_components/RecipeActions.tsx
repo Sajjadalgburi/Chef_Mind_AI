@@ -13,7 +13,7 @@ interface RecipeActionsProps {
   isCreatingRecipes?: boolean;
   isDisliked: boolean;
   onSave: (recipe: MealPlanResponse["recipes"][0]) => void;
-  onDislike: (recipeTitle: string) => void;
+  onDislike: (recipe_title: string) => void;
 }
 
 const RecipeActions = ({
@@ -57,7 +57,7 @@ const RecipeActions = ({
             </button>
 
             <button
-              onClick={() => onDislike(recipe.title)}
+              onClick={() => onDislike(recipe.title as string)}
               className={`flex gap-3 justify-center items-center p-2 ${
                 isDisliked ? "bg-red-200" : "bg-red-100"
               } rounded-lg shadow-md transform transition-all duration-200 hover:scale-105`}
