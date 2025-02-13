@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MealCardsProps, MealPlanResponse } from "@/types";
 import { LoadingCard } from "./LoadingCard";
-import {
-  createManyRecipe,
-  getUserRecipes,
-  removeRecipe,
-  saveRecipe,
-} from "@/actions";
+import { createManyRecipe, removeRecipe, saveRecipe } from "@/actions";
 import useAuth from "@/hooks/useAuth";
 import RecipeCard from "../recipe_card_components/RecipeCard";
 import toast from "react-hot-toast";
@@ -19,9 +14,13 @@ const MealCards: React.FC<MealCardsProps> = ({
   const { user } = useAuth();
   const [isCreatingRecipes, setIsCreatingRecipes] = useState(true);
   const [recipeIds, setRecipeIds] = useState<{ [key: string]: number }>({});
-  const [isSaved, setIsSaved] = useState(false);
+  const [savedRecipes, setSavedRecipes] = useState<{ [key: string]: boolean }>(
+    {}
+  );
+  const [dislikedRecipes, setDislikedRecipes] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [recievedResponse, setRecievedResponse] = useState(false);
-
   const userId = user?.id;
 
   useEffect(() => {
@@ -89,9 +88,6 @@ const MealCards: React.FC<MealCardsProps> = ({
   }, [isMealPlanLoading, recipes]);
 
   const handleSave = async (recipe: MealPlanResponse["recipes"][0]) => {
-    // if the recipe is already saved, then do not save it again
-    if (!isSaved) return; // isSaved = true is same as !isSaved
-
     if (!userId) {
       toast.error("Please login to save recipes");
       return;
@@ -104,16 +100,25 @@ const MealCards: React.FC<MealCardsProps> = ({
     }
 
     try {
-      const { success, error } = await saveRecipe(userId, recipeId);
+      const { error, success } = await saveRecipe(userId, recipeId);
 
       if (error || !success) {
-        throw new Error(error);
+        toast.error(error);
+        return;
       }
 
-      // Refresh the recipes list
-      // const response = await getUserRecipes(userId);
+      setSavedRecipes((prev) => ({
+        ...prev,
+        [recipe.title]: !prev[recipe.title],
+      }));
 
-      setIsSaved(true);
+      // If recipe was disliked, remove dislike when liking
+      if (dislikedRecipes[recipe.title]) {
+        setDislikedRecipes((prev) => ({
+          ...prev,
+          [recipe.title]: false,
+        }));
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to save recipe";
@@ -128,23 +133,30 @@ const MealCards: React.FC<MealCardsProps> = ({
     }
 
     const recipeId = recipeIds[recipe_title];
-
     if (!recipeId) {
       toast.error("Recipe ID not found");
       return;
     }
 
     try {
-      const result = await removeRecipe(recipeId as number, userId as string);
+      const { success, error } = await removeRecipe(recipeId, userId);
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (error || !success) {
+        toast.error("Could not dislike recipe");
+        return;
       }
 
-      // Refresh the recipes list
-      const response = await getUserRecipes(userId);
-      if ("error" in response) {
-        throw new Error(response.error);
+      setDislikedRecipes((prev) => ({
+        ...prev,
+        [recipe_title]: !prev[recipe_title],
+      }));
+
+      // If recipe was liked, remove like when disliking
+      if (savedRecipes[recipe_title]) {
+        setSavedRecipes((prev) => ({
+          ...prev,
+          [recipe_title]: false,
+        }));
       }
     } catch (err) {
       const errorMessage =
@@ -159,20 +171,20 @@ const MealCards: React.FC<MealCardsProps> = ({
         <>
           <h1 className="md:text-6xl text-left font-bold text-gray-800">
             Your Personalized Meal Plan
-          </h1>{" "}
+          </h1>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
             {recipes.map((recipe, index) => (
               <RecipeCard
                 key={`${recipe.title}-${index}`}
                 recipe={recipe}
                 isCreatingRecipes={isCreatingRecipes}
-                isSaved={isSaved}
-                isDisliked={false}
+                isSaved={savedRecipes[recipe.title] || false}
+                isDisliked={dislikedRecipes[recipe.title] || false}
                 onSave={handleSave}
                 onDislike={handleDislike}
               />
-            ))}{" "}
-          </div>{" "}
+            ))}
+          </div>
         </>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
