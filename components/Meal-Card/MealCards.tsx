@@ -18,6 +18,7 @@ const MealCards: React.FC<MealCardsProps> = ({
   const [visibleSkeletons, setVisibleSkeletons] = useState(1);
   const { user } = useAuth();
   const [isCreatingRecipes, setIsCreatingRecipes] = useState(true);
+  const [recipeIds, setRecipeIds] = useState<{ [key: string]: number }>({});
 
   const userId = user?.id;
 
@@ -26,11 +27,23 @@ const MealCards: React.FC<MealCardsProps> = ({
       if (!recipes || recipes.length === 0 || !user || !userId) return;
 
       try {
-        const result = await createManyRecipe(recipes, userId);
+        const { data, error } = await createManyRecipe(recipes, userId);
 
-        if (result.error) {
-          throw new Error(result.error);
+        if (error || !data) {
+          throw new Error(error);
         }
+
+        const idMap = data.reduce(
+          (
+            acc: { [key: string]: number },
+            recipe: { id: number; title: string }
+          ) => {
+            acc[recipe.title] = recipe.id;
+            return acc;
+          },
+          {}
+        );
+        setRecipeIds(idMap);
 
         setIsCreatingRecipes(false);
       } catch (error) {
@@ -66,8 +79,14 @@ const MealCards: React.FC<MealCardsProps> = ({
       return;
     }
 
+    const recipeId = recipeIds[recipe.title];
+    if (!recipeId) {
+      toast.error("Recipe ID not found");
+      return;
+    }
+
     try {
-      const result = await saveRecipe(recipe, userId);
+      const result = await saveRecipe(userId, recipeId);
 
       if (result.error) {
         throw new Error(result.error);
@@ -85,14 +104,21 @@ const MealCards: React.FC<MealCardsProps> = ({
     }
   };
 
-  const handleDislike = async (recipeTitle: string) => {
+  const handleDislike = async (recipe_title: string) => {
     if (!userId) {
       toast.error("Please login to manage recipes");
       return;
     }
 
+    const recipeId = recipeIds[recipe_title];
+
+    if (!recipeId) {
+      toast.error("Recipe ID not found");
+      return;
+    }
+
     try {
-      const result = await removeRecipe(recipeTitle, userId);
+      const result = await removeRecipe(recipeId as number, userId as string);
 
       if (result.error) {
         throw new Error(result.error);
