@@ -62,6 +62,12 @@ export type MealPlanResponse = {
     imagePrompt: string;
     tips: string[];
     source: string;
+    user?: {
+      id: string;
+      name: string;
+      email: string;
+      image: string;
+    };
   }>;
 };
 
