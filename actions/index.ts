@@ -259,11 +259,50 @@ export const removeRecipe = async (recipeId: number, userId: string) => {
 export const getAllRecipes = async () => {
   const supabaseClient = await createClient();
 
-  const { data, error } = await supabaseClient.from("recipes").select("*");
+  const { data: recipes, error: recipesError } = await supabaseClient
+    .from("recipes")
+    .select("*")
+    .limit(20);
 
-  if (error) {
-    return { error: "Cannot fetch recipes" };
+  // If there is an error fetching recipes, return early
+  if (recipesError || !recipes) {
+    return { error: { recipesError }, associatedUsers: null };
   }
 
-  return data as MealPlanResponse["recipes"];
+  // Extract unique user IDs
+  const userIds = [
+    ...new Set(recipes.map((recipe) => recipe.user_id as string)),
+  ];
+
+  // If no user IDs are found, return early
+  if (userIds.length === 0) {
+    return { error: "No user IDs found", associatedUsers: null };
+  }
+
+  // Fetch users for those IDs
+  const { data: users, error: userError } = await getAllUsers(userIds);
+
+  if (users === undefined) {
+    return { error: "No users found", associatedUsers: null };
+  }
+
+  return {
+    associatedUsers: { users, recipes },
+    error: { recipesError, userError },
+  };
+};
+
+export const getAllUsers = async (userIds: string[]) => {
+  const supabaseClient = await createClient();
+
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("*")
+    .in("id", userIds);
+
+  if (data === null || data === undefined) {
+    return { error: "No users found" };
+  }
+
+  return { data, error };
 };
