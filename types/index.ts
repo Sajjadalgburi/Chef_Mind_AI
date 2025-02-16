@@ -37,6 +37,7 @@ export type GenerateMealPlanProps = {
 
 export type MealPlanResponse = {
   recipes: Array<{
+    id?: number;
     title: string;
     cuisine: string;
     difficulty: string;
@@ -57,6 +58,7 @@ export type MealPlanResponse = {
       fat: string;
     };
     imageUrl?: string;
+    created_at?: string;
     imagePrompt: string;
     tips: string[];
     source: string;
