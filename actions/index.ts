@@ -286,8 +286,25 @@ export const getAllRecipes = async () => {
     return { error: "No users found", associatedUsers: null };
   }
 
+  // Create a map of users by their IDs for faster lookup
+  const userMap = users.reduce((acc, user) => {
+    acc[user.id] = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+    };
+    return acc;
+  }, {} as Record<string, MealPlanResponse["recipes"][0]["user"]>);
+
+  // Append user object to each recipe
+  const recipesWithUsers = recipes.map((recipe) => ({
+    ...recipe,
+    user: userMap[recipe.user_id],
+  }));
+
   return {
-    associatedUsers: { users, recipes },
+    associatedUsers: { users, recipes: recipesWithUsers },
     error: { recipesError, userError },
   };
 };
