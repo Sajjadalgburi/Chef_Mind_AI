@@ -2,17 +2,17 @@
 
 import { getAllRecipes } from "@/actions";
 import { BentoGridSection } from "@/components/BentoGrid";
+import { BentoGrid } from "@/components/ui/bento-grid";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MealPlanResponse } from "@/types";
-import { User } from "@supabase/supabase-js";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 const PublicPage = () => {
-  const [publicRecipes, setPublicRecipes] = useState<{
-    users: User[];
-    recipes: MealPlanResponse["recipes"];
-  }>({ users: [], recipes: [] });
+  const [publicRecipes, setPublicRecipes] = useState<
+    MealPlanResponse["recipes"]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,8 +32,8 @@ const PublicPage = () => {
       }
 
       if (associatedUsers) {
-        const { users, recipes } = associatedUsers;
-        setPublicRecipes({ users, recipes });
+        const { recipes } = associatedUsers;
+        setPublicRecipes(recipes);
         setLoading(false);
       }
     };
@@ -45,13 +45,19 @@ const PublicPage = () => {
     <section className="w-full h-full my-10">
       {loading ? (
         <div className="flex justify-center items-center h-full">
-          <div className="flex justify-center items-center h-full">
-            <p>Loading...</p>
-          </div>
+          <BentoGrid>
+            {Array.from({ length: 9 }).map((_, index) => (
+              <Skeleton key={index} className="h-48 w-full" />
+            ))}
+          </BentoGrid>
+        </div>
+      ) : publicRecipes.length > 1 ? (
+        <div className="flex justify-center items-center h-full">
+          <BentoGridSection content={publicRecipes} />
         </div>
       ) : (
         <div className="flex justify-center items-center h-full">
-          <BentoGridSection content={publicRecipes} isLoading={loading} />
+          <p>No recipes found</p>
         </div>
       )}
     </section>
