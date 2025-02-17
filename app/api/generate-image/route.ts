@@ -1,7 +1,8 @@
 /**
- * Route for generating an image based on a recipe description
+ * Route for generating an image based on a recipe description and saving it to Supabase Storage.
  */
 
+import { createClient } from "@/utils/server";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 
@@ -13,7 +14,6 @@ export const runtime = "edge";
 
 export async function POST(request: Request) {
   try {
-    // Make sure to check if the API key is set
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: "OpenAI API key is not set" },
@@ -23,11 +23,10 @@ export async function POST(request: Request) {
 
     console.log("---- Generating Image Route ----");
 
-    const {
-      imagePrompt,
-    }: {
-      imagePrompt: string;
-    } = await request.json();
+    // Initialize Supabase
+    const supabase = await createClient();
+
+    const { imagePrompt }: { imagePrompt: string } = await request.json();
 
     if (!imagePrompt) {
       return NextResponse.json(
@@ -52,6 +51,7 @@ Consider the following aspects:
 Generate a high-quality, mouthwatering image that looks as if it were taken for a gourmet food magazine or a high-end restaurant menu.
 `;
 
+    // Generate Image with DALL·E
     const response = await openai.images.generate({
       model: "dall-e-2",
       prompt: mainPrompt,
@@ -59,13 +59,56 @@ Generate a high-quality, mouthwatering image that looks as if it were taken for 
       size: "1024x1024",
     });
 
-    const imageUrl = response.data[0].url;
+    if (!response || !response.data || !response.data[0].url) {
+      throw new Error("Failed to generate image");
+    }
 
-    return NextResponse.json({ imageUrl });
-  } catch (error) {
-    console.error("Error generating image:", error);
+    const imageUrl = response.data[0].url;
+    console.log("Generated Image URL:", imageUrl);
+
+    // Fetch the image data
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error("Failed to fetch generated image");
+    }
+
+    const imageBlob = await imageResponse.blob();
+    const arrayBuffer = await imageBlob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Generate a unique filename
+    const timestamp = Date.now();
+    const fileName = `images/${imagePrompt.replace(
+      /\s+/g,
+      "-"
+    )}-${timestamp}.png`;
+
+    // Upload to Supabase Storage
+    const { error } = await supabase.storage
+      .from("dalle-images")
+      .upload(fileName, buffer, {
+        contentType: "image/png",
+        upsert: true,
+      });
+
+    if (error) {
+      console.error("Supabase Upload Error:", error);
+      throw new Error("Failed to upload image to Supabase");
+    }
+
+    // Get the public URL of the uploaded image
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("dalle-images").getPublicUrl(fileName);
+    console.log("Stored Image URL:", publicUrl);
+
+    return NextResponse.json({ success: true, imageUrl: publicUrl });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error("Error generating or uploading image:", error);
     return NextResponse.json(
-      { error: "Failed to generate image" },
+      { error: error.message || "Failed to generate and save image" },
       { status: 500 }
     );
   }
