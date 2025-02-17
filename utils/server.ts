@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export const createClient = async () => {
+export const createClient = async (supabaseAccessToken?: string) => {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -20,10 +20,14 @@ export const createClient = async () => {
           } catch (error) {
             console.error("Error setting cookies:", error);
             // The `set` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // This can be ignored if you have middleware refreshing user sessions.
           }
         },
+      },
+      global: {
+        headers: supabaseAccessToken
+          ? { Authorization: `Bearer ${supabaseAccessToken}` }
+          : {},
       },
     }
   );
