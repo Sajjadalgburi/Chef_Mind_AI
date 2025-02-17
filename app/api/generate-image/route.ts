@@ -5,12 +5,16 @@
 import { createClient } from "@/utils/server";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
+import { auth } from "@/app/auth";
+export const runtime = "edge";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-export const runtime = "edge";
+const session = await auth();
+
+const supabaseAccessToken = session?.supabaseAccessToken;
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +28,7 @@ export async function POST(request: Request) {
     console.log("---- Generating Image Route ----");
 
     // Initialize Supabase
-    const supabase = await createClient();
+    const supabase = await createClient(supabaseAccessToken ?? undefined);
 
     const { imagePrompt }: { imagePrompt: string } = await request.json();
 

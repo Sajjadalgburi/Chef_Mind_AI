@@ -17,23 +17,29 @@ const PublicPage = () => {
 
   useEffect(() => {
     const fetchRecipes = async () => {
-      const { error, associatedUsers } = await getAllRecipes();
+      try {
+        const { error, associatedUsers } = await getAllRecipes();
 
-      if (typeof error === "object" && error !== null) {
-        const { recipesError, userError } = error;
+        if (typeof error === "object" && error !== null) {
+          const { recipesError, userError } = error;
 
-        if (recipesError) {
-          toast.error(recipesError.message);
+          if (recipesError) {
+            toast.error(recipesError.message);
+          }
+
+          if (userError) {
+            toast.error(userError);
+          }
         }
 
-        if (userError) {
-          toast.error(userError);
+        if (associatedUsers) {
+          const { recipes } = associatedUsers;
+          setPublicRecipes(recipes);
         }
-      }
-
-      if (associatedUsers) {
-        const { recipes } = associatedUsers;
-        setPublicRecipes(recipes);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+        toast.error("Error fetching recipes");
+      } finally {
         setLoading(false);
       }
     };
@@ -44,13 +50,15 @@ const PublicPage = () => {
   return (
     <section className="w-full h-full my-10">
       {loading ? (
-        <div className="flex justify-center items-center h-full">
-          <BentoGrid>
-            {Array.from({ length: 9 }).map((_, index) => (
-              <Skeleton key={index} className="h-48 w-full" />
-            ))}
-          </BentoGrid>
-        </div>
+        <BentoGrid>
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </BentoGrid>
       ) : publicRecipes.length > 1 ? (
         <div className="flex justify-center items-center h-full">
           <BentoGridSection content={publicRecipes} />

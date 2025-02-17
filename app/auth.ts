@@ -27,10 +27,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET! as string,
     }),
   ],
+
   adapter: SupabaseAdapter({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!,
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
   }),
+
   callbacks: {
     async session({ session, user }) {
       const signingSecret = process.env.SUPABASE_JWT_SECRET ?? "";
@@ -49,6 +51,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .setExpirationTime("2h") // Set expiration time as needed
           .sign(new TextEncoder().encode(signingSecret));
       }
+
       return session;
     },
   },
