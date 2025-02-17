@@ -3,15 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 
-/**
- * Checks if the path is an API route
- * @param path - The path to check
- * @returns True if the path is an API route, false otherwise
- */
-const isAPI = (path: string) => {
-  return path.startsWith("/api/") || path.startsWith("/app/api/");
-};
-
 export const protectedRoutes = [
   "/api/generate-meal-plan",
   "/api/analyze-image",
@@ -21,7 +12,25 @@ export const protectedRoutes = [
   "/profile",
 ];
 
+/**
+ * Checks if the path is an API route
+ * @param path - The path to check
+ * @returns True if the path is an API route, false otherwise
+ */
+const isAPI = (path: string) => {
+  return path.startsWith("/api/") || path.startsWith("/app/api/");
+};
+
 export const publicRoutes = ["/public"];
+
+if (
+  !process.env.UPSTASH_REDIS_REST_URL ||
+  !process.env.UPSTASH_REDIS_REST_TOKEN
+) {
+  throw new Error(
+    "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be set in the environment variables"
+  );
+}
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL ?? "",
@@ -34,15 +43,6 @@ const ratelimit = new Ratelimit({
   ephemeralCache: new Map(),
   analytics: true,
 });
-
-if (
-  !process.env.UPSTASH_REDIS_REST_URL ||
-  !process.env.UPSTASH_REDIS_REST_TOKEN
-) {
-  throw new Error(
-    "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be set in the environment variables"
-  );
-}
 
 export default async function middleware(req: NextRequest) {
   const { nextUrl } = req;
