@@ -2,12 +2,12 @@
 
 import { getAllRecipes } from "@/actions";
 import { BentoGridSection } from "@/components/BentoGrid";
-import { Skeleton } from "@/components/ui/skeleton";
 import { MealPlanResponse } from "@/types";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { Search, Filter } from "lucide-react";
+import LoadingStateSkeleton from "@/components/LoadingStateSkeleton";
 
 const PublicPage = () => {
   const [publicRecipes, setPublicRecipes] = useState<
@@ -36,6 +36,10 @@ const PublicPage = () => {
 
         if (associatedUsers) {
           const { recipes } = associatedUsers;
+
+          // Randomize the recipe selection order
+          recipes.sort(() => Math.random() - 0.5);
+
           setPublicRecipes(recipes);
         }
       } catch (error) {
@@ -76,7 +80,7 @@ const PublicPage = () => {
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           {/* Search functionality */}
           <div className="flex-1 join">
-            <div className="join-item btn btn-square btn-ghost">
+            <div className="join-item btn btn-square bg-base-300">
               <Search className="w-5 h-5" />
             </div>
             <input
@@ -89,7 +93,7 @@ const PublicPage = () => {
           </div>
 
           <div className="join">
-            <div className="join-item btn btn-square btn-ghost">
+            <div className="join-item btn btn-square bg-base-300">
               <Filter className="w-5 h-5" />
             </div>
             <select
@@ -108,23 +112,7 @@ const PublicPage = () => {
 
         <>
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-6 auto-rows-[300px]">
-              {Array(6)
-                .fill(0)
-                .map((_, i) => (
-                  <div key={i} className="card bg-base-100 shadow-xl">
-                    <Skeleton className="h-48 w-full rounded-t-2xl" />
-                    <div className="card-body">
-                      <Skeleton className="h-6 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <div className="flex gap-2 mt-2">
-                        <Skeleton className="h-6 w-16" />
-                        <Skeleton className="h-6 w-16" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
+            <LoadingStateSkeleton />
           ) : filteredRecipes.length > 0 ? (
             <BentoGridSection content={filteredRecipes} />
           ) : (
