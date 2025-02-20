@@ -33,8 +33,6 @@ export async function POST(request: Request) {
     const { imagePrompt, userId }: { imagePrompt: string; userId: string } =
       await request.json();
 
-    console.log("userId", userId);
-
     if (!imagePrompt || !userId) {
       return NextResponse.json(
         { error: "No image prompt provided or user ID" },
@@ -84,16 +82,13 @@ Generate a high-quality, mouthwatering image that looks as if it were taken for 
 
     // Generate a unique filename
     const timestamp = Date.now();
-    const fileName = `images/${userId}-${timestamp}.png`;
-
-    console.log("\n---File NAme:", fileName);
-    console.log("---File NAme:\n");
+    const fileName = `public/${userId}-${timestamp}.jpg`;
 
     // Upload to Supabase Storage
     const { error } = await supabase.storage
       .from("dalle-images")
       .upload(fileName, buffer, {
-        contentType: "image/png",
+        contentType: "image/jpg",
         upsert: true,
       });
 
@@ -106,8 +101,6 @@ Generate a high-quality, mouthwatering image that looks as if it were taken for 
     const {
       data: { publicUrl },
     } = supabase.storage.from("dalle-images").getPublicUrl(fileName);
-    console.log("\n----Stored Image URL:", publicUrl);
-    console.log("----Stored Image URL\n-----");
     return NextResponse.json({ success: true, imageUrl: publicUrl });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
