@@ -24,11 +24,11 @@ const RecipeCard = ({
   onDislike,
 }: RecipeCardProps) => {
   return (
-    <div className="bg-white flex flex-col justify-between gap-1 sm:gap-3 py-3 px-3 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+    <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300">
       <RecipeImageSection recipe={recipe} />
 
-      <div className="p-6">
-        <h3 className="text-xl md:text-3xl font-semibold text-gray-800 mb-3">
+      <div className="card-body">
+        <h3 className="card-title text-xl md:text-3xl">
           {recipe.title}
         </h3>
         <RecipeDetails recipe={recipe} />
@@ -36,27 +36,28 @@ const RecipeCard = ({
         <RecipeNutrition nutritionalInfo={recipe.nutritionalInfo} />
       </div>
 
-      <RecipeActions
-        recipe={recipe}
-        isSaved={isSaved}
-        isDisliked={isDisliked}
-        isCreatingRecipes={isCreatingRecipes}
-        onSave={onSave}
-        onDislike={onDislike}
-      />
+      <div className="card-actions justify-end px-6 pb-6">
+        <RecipeActions
+          recipe={recipe}
+          isSaved={isSaved}
+          isDisliked={isDisliked}
+          isCreatingRecipes={isCreatingRecipes}
+          onSave={onSave}
+          onDislike={onDislike}
+        />
 
-      <Link
-        href={
-          typeof recipe.source === "string" && recipe.source.startsWith("http")
-            ? recipe.source
-            : `https://${recipe.source}`
-        }
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium"
-      >
-        View Full Recipe
-      </Link>
+        <Link
+          href={
+            typeof recipe.source === "string" && recipe.source.startsWith("http")
+              ? recipe.source
+              : "#"
+          }
+          target="_blank"
+          className="btn btn-primary btn-outline"
+        >
+          View Recipe
+        </Link>
+      </div>
     </div>
   );
 };
