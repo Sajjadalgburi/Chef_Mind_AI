@@ -18,7 +18,7 @@ export default function Hero({ image }: { image: string }) {
 
   return (
     <div
-      className={`text-center max-w-4xl mx-auto px-6 pt-20 pb-16 ${
+      className={`text-center max-w-4xl mx-auto px-6 sm:pt-20 sm:pb-16 ${
         image ? "hidden" : ""
       }`}
     >
@@ -29,7 +29,9 @@ export default function Hero({ image }: { image: string }) {
         <span className="text-terracotta">meals</span>
       </h1>
 
-      <p className={`text-sage text-lg md:text-xl max-w-2xl mx-auto`}>
+      <p
+        className={`text-sage text-sm sm:text-lg md:text-xl max-w-2xl mx-auto`}
+      >
         Upload a photo of your ingredients and let AI craft personalized
         recipes. Transform everyday ingredients into extraordinary dishes.
       </p>
