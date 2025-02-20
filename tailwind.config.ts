@@ -70,16 +70,13 @@ export default {
       },
     },
   },
-  plugins: [animate, addVariablesForColors, daisyui],
+  plugins: [
+    animate,
+    daisyui,
+    addVariablesForColors,
+  ],
   daisyui: {
     themes: ["emerald"],
-    base: true,
-    styled: true,
-    defaultTheme: "emerald",
-    utils: true,
-    prefix: "",
-    logs: true,
-    themeRoot: ":root",
   },
 } satisfies Config;
 
