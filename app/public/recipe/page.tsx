@@ -4,12 +4,19 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Clock, ChefHat, ArrowLeft } from "lucide-react";
+import {
+  Clock,
+  ChefHat,
+  ArrowLeft,
+  Heart,
+  Share2,
+  Bookmark,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MealPlanResponse } from "@/types";
+import toast from "react-hot-toast";
 
 const RecipePage = () => {
   const searchParams = useSearchParams();
@@ -45,18 +52,24 @@ const RecipePage = () => {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Skeleton className="h-[400px] w-full rounded-xl mb-8" />
-        <Skeleton className="h-12 w-3/4 mb-4" />
-        <Skeleton className="h-6 w-1/2 mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <Skeleton className="h-8 w-1/3 mb-4" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-          <div>
-            <Skeleton className="h-8 w-1/3 mb-4" />
-            <Skeleton className="h-24 w-full" />
+      <div className="min-h-screen bg-base-200 py-8">
+        <div className="container mx-auto px-4">
+          <div className="card bg-base-100 shadow-xl">
+            <Skeleton className="h-[400px] w-full rounded-t-2xl" />
+            <div className="card-body">
+              <Skeleton className="h-8 w-3/4 mb-4" />
+              <Skeleton className="h-4 w-1/2 mb-6" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <Skeleton className="h-6 w-1/3 mb-4" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+                <div>
+                  <Skeleton className="h-6 w-1/3 mb-4" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -65,123 +78,179 @@ const RecipePage = () => {
 
   if (!recipe) {
     return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Recipe not found</h1>
-        <p className="text-gray-600 mb-6">
-          The recipe you&apos;re looking for doesn&apos;t exist or has been
-          removed.
-        </p>
-        <Link
-          href="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Link>
+      <div className="min-h-screen bg-base-200 py-8">
+        <div className="container mx-auto px-4">
+          <div className="card bg-base-100 shadow-xl text-center p-8">
+            <h1 className="text-2xl font-bold mb-4">Recipe not found</h1>
+            <p className="text-base-content/70 mb-6">
+              The recipe you&rsquo;re looking for doesn&lsquo;t exist or has
+              been removed.
+            </p>
+            <Link href="/" className="btn btn-primary">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   const createdDate = recipe.created_at
-    ? formatDistanceToNow(new Date(recipe.created_at), {
-        addSuffix: true,
-      })
+    ? formatDistanceToNow(new Date(recipe.created_at), { addSuffix: true })
     : "Recently";
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard!");
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Link
-        href="/"
-        className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-6"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Home
-      </Link>
-
-      <div className="relative h-[400px] w-full rounded-xl overflow-hidden mb-8">
-        <Image
-          src={recipe.imageUrl || "/images/placeholder-image.jpg"}
-          alt={recipe.title}
-          fill
-          priority
-          className="object-cover"
-        />
-      </div>
-
-      <div className="flex items-center gap-4 mb-6">
-        <Badge variant="secondary" className="bg-gray-100">
-          {recipe.cuisine}
-        </Badge>
-        <Badge
-          className={`${
-            recipe.difficulty === "Easy"
-              ? "bg-green-500"
-              : recipe.difficulty === "Medium"
-              ? "bg-yellow-500"
-              : "bg-red-500"
-          }`}
-        >
-          {recipe.difficulty}
-        </Badge>
-      </div>
-
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">{recipe.title}</h1>
-
-      <div className="flex items-center gap-6 text-gray-600 mb-8">
-        <div className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          <span>{recipe.prepTime}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <ChefHat className="h-5 w-5" />
-          <span>{recipe.servings} servings</span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Ingredients</h2>
-          <ul className="space-y-2">
-            {recipe?.ingredients?.map((ingredient, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-gray-700">
-                <span className="font-medium">{ingredient.item}</span>
-                {!ingredient.required && (
-                  <span className="text-sm text-gray-500">(optional)</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Nutritional Info</h2>
-          <div className="space-y-2 text-gray-700">
-            <p>Calories: {recipe.nutritionalInfo?.calories}</p>
-            <p>Protein: {recipe.nutritionalInfo?.protein}</p>
-            <p>Carbs: {recipe.nutritionalInfo?.carbs}</p>
+    <div className="min-h-screen bg-base-200 py-8">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center mb-8">
+          <Link href="/" className="btn btn-ghost gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Recipes
+          </Link>
+          <div className="flex gap-2">
+            <button onClick={handleShare} className="btn btn-ghost btn-circle">
+              <Share2 className="w-5 h-5" />
+            </button>
+            <button className="btn btn-ghost btn-circle">
+              <Heart className="w-5 h-5" />
+            </button>
+            <button className="btn btn-ghost btn-circle">
+              <Bookmark className="w-5 h-5" />
+            </button>
           </div>
         </div>
-      </div>
 
-      {recipe.user && (
-        <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-          <div className="flex items-center gap-3">
+        <div className="card bg-base-100 shadow-xl overflow-hidden">
+          <figure className="relative h-[400px]">
             <Image
-              src={recipe.user?.image || "/images/default-avatar.png"}
-              alt={recipe.user?.name || "User"}
-              width={40}
-              height={40}
-              className="rounded-full"
+              src={recipe.imageUrl || "/images/placeholder-image.jpg"}
+              alt={recipe.title}
+              fill
+              priority
+              className="object-cover"
             />
-            <div>
-              <p className="font-medium text-gray-800">
-                {recipe.user?.name || "Anonymous User"}
-              </p>
-              <p className="text-sm text-gray-500">Created {createdDate}</p>
+          </figure>
+
+          <div className="card-body">
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="badge badge-primary">{recipe.cuisine}</div>
+              <div
+                className={`badge ${
+                  recipe.difficulty === "Easy"
+                    ? "badge-success"
+                    : recipe.difficulty === "Medium"
+                    ? "badge-warning"
+                    : "badge-error"
+                }`}
+              >
+                {recipe.difficulty}
+              </div>
             </div>
+
+            <h1 className="card-title text-4xl mb-4">{recipe.title}</h1>
+
+            <div className="stats shadow mb-8">
+              <div className="stat">
+                <div className="stat-figure text-primary">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <div className="stat-title">Prep Time</div>
+                <div className="stat-value text-lg">{recipe.prepTime}</div>
+              </div>
+
+              <div className="stat">
+                <div className="stat-figure text-primary">
+                  <ChefHat className="w-6 h-6" />
+                </div>
+                <div className="stat-title">Servings</div>
+                <div className="stat-value text-lg">{recipe.servings}</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="card bg-base-200">
+                <div className="card-body">
+                  <h2 className="card-title text-2xl mb-4">Ingredients</h2>
+                  <ul className="space-y-3">
+                    {recipe?.ingredients?.map((ingredient, index: number) => (
+                      <li key={index} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-sm"
+                        />
+                        <span className="flex-1">{ingredient.item}</span>
+                        {!ingredient.required && (
+                          <span className="badge badge-ghost">optional</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="card bg-base-200">
+                <div className="card-body">
+                  <h2 className="card-title text-2xl mb-4">Nutritional Info</h2>
+                  <div className="stats stats-vertical shadow">
+                    <div className="stat">
+                      <div className="stat-title">Calories</div>
+                      <div className="stat-value text-lg">
+                        {recipe.nutritionalInfo?.calories}
+                      </div>
+                    </div>
+                    <div className="stat">
+                      <div className="stat-title">Protein</div>
+                      <div className="stat-value text-lg">
+                        {recipe.nutritionalInfo?.protein}
+                      </div>
+                    </div>
+                    <div className="stat">
+                      <div className="stat-title">Carbs</div>
+                      <div className="stat-value text-lg">
+                        {recipe.nutritionalInfo?.carbs}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {recipe.user && (
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-base-300">
+                <div className="flex items-center gap-4">
+                  <div className="avatar">
+                    <div className="w-12 h-12 rounded-full">
+                      <Image
+                        src={recipe.user?.image || "/images/default-avatar.png"}
+                        alt={recipe.user?.name || "User"}
+                        width={48}
+                        height={48}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-medium">
+                      {recipe.user?.name || "Anonymous User"}
+                    </p>
+                    <p className="text-sm text-base-content/70">
+                      Created {createdDate}
+                    </p>
+                  </div>
+                </div>
+                <button className="btn btn-primary btn-outline">
+                  Follow Chef
+                </button>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
