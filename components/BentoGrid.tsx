@@ -31,7 +31,7 @@ export function BentoGridSection({ content }: BentoGridProps) {
             <Link
               href={`/recipe/${recipe.id}`}
               key={`${recipe.title}-${i}`}
-              className="group bg-white rounded-xl hover:scale-105 transform shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+              className="group bg-white rounded-xl hover:scale-102 transform shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
             >
               <div className="relative h-48 w-full">
                 <Image
@@ -41,6 +41,8 @@ export function BentoGridSection({ content }: BentoGridProps) {
                   }
                   alt={recipe.title}
                   fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
