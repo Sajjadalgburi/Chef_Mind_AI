@@ -1,5 +1,5 @@
 import { MealPlanResponse } from "@/types";
-import React from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import { Clock, ChefHat } from "lucide-react";
 import Link from "next/link";
@@ -10,12 +10,23 @@ interface BentoGridProps {
 }
 
 export function BentoGridSection({ content }: BentoGridProps) {
+  // Randomly select featured indices (approximately 1/3 of the cards)
+  const featuredIndices = useMemo(() => {
+    if (!content) return new Set<number>();
+    const numFeatured = Math.floor(content.length / 3);
+    const indices = new Set<number>();
+    while (indices.size < numFeatured) {
+      indices.add(Math.floor(Math.random() * content.length));
+    }
+    return indices;
+  }, [content]);
+
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+      <div className="grid grid-cols-1 md:grid-cols-2 grid-flow-dense lg:grid-cols-3 gap-6 ">
         {content?.map((recipe, i) => {
           const creator = recipe?.user;
-          const isFeatured = (i + 1) % 3 === 0; // Every third card will be featured
+          const isFeatured = featuredIndices.has(i);
 
           const createdDate = recipe.created_at
             ? formatDistanceToNow(new Date(recipe.created_at), {
