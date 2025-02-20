@@ -1,7 +1,6 @@
 import { MealPlanResponse } from "@/types";
 import React from "react";
 import Image from "next/image";
-import { Badge } from "./ui/badge";
 import { Clock, ChefHat } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -13,13 +12,10 @@ interface BentoGridProps {
 export function BentoGridSection({ content }: BentoGridProps) {
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-        Community Recipes
-      </h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
         {content?.map((recipe, i) => {
           const creator = recipe?.user;
+          const isFeatured = (i + 1) % 3 === 0; // Every third card will be featured
 
           const createdDate = recipe.created_at
             ? formatDistanceToNow(new Date(recipe.created_at), {
@@ -31,75 +27,86 @@ export function BentoGridSection({ content }: BentoGridProps) {
             <Link
               href={`/public/recipe?id=${recipe.id}`}
               key={`${recipe.title}-${i}`}
-              className="group bg-white rounded-xl hover:scale-102 transform shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+              className={`group card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden ${
+                isFeatured
+                  ? "md:col-span-2 md:row-span-2"
+                  : "col-span-1 row-span-1"
+              }`}
             >
-              <div className="relative h-48 w-full">
+              <figure
+                className={`relative ${isFeatured ? "h-[400px]" : "h-48"}`}
+              >
                 <Image
-                  src={
-                    (recipe.imageUrl as string) ||
-                    "/images/placeholder-image.jpg"
-                  }
+                  src={recipe.imageUrl || "/images/placeholder-image.jpg"}
                   alt={recipe.title}
                   fill
                   priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes={
+                    isFeatured
+                      ? "(max-width: 768px) 100vw, 66vw"
+                      : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  }
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <Badge variant="secondary" className="bg-white/90">
+                  <div className="badge badge-primary badge-outline">
                     {recipe.cuisine}
-                  </Badge>
-                  <Badge
-                    className={`${
+                  </div>
+                  <div
+                    className={`badge ${
                       recipe.difficulty === "Easy"
-                        ? "bg-green-500"
+                        ? "badge-success"
                         : recipe.difficulty === "Medium"
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
+                        ? "badge-warning"
+                        : "badge-error"
                     }`}
                   >
                     {recipe.difficulty}
-                  </Badge>
+                  </div>
                 </div>
-              </div>
+              </figure>
 
-              <div className="p-5">
-                <h2 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors">
+              <div className="card-body">
+                <h2
+                  className={`card-title ${
+                    isFeatured ? "text-3xl" : "text-xl"
+                  }`}
+                >
                   {recipe.title}
                 </h2>
 
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-4 text-base-content/70">
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="w-4 h-4" />
                     <span>{recipe.prepTime}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <ChefHat className="h-4 w-4" />
+                    <ChefHat className="w-4 h-4" />
                     <span>{recipe.servings} servings</span>
                   </div>
                 </div>
 
                 {creator && (
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={recipe.user?.image || "/images/default-avatar.png"}
-                        alt={recipe.user?.name || "User"}
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
-
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-800">
-                          {recipe.user?.name || "Anonymous User"}
-                        </span>
+                  <div className="flex items-center gap-3 mt-4">
+                    <div className="avatar">
+                      <div className="w-8 h-8 rounded-full">
+                        <Image
+                          src={creator.image || "/images/default-avatar.png"}
+                          alt={creator.name || "User"}
+                          width={32}
+                          height={32}
+                        />
                       </div>
                     </div>
-                    <span className="text-xs text-gray-500">
-                      Created - {createdDate}
-                    </span>{" "}
+                    <div>
+                      <p className="text-sm font-medium">
+                        {creator.name || "Anonymous User"}
+                      </p>
+                      <p className="text-xs text-base-content/70">
+                        Created {createdDate}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
