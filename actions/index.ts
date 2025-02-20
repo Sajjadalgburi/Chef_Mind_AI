@@ -261,8 +261,7 @@ export const getAllRecipes = async () => {
 
   const { data: recipes, error: recipesError } = await supabaseClient
     .from("recipes")
-    .select("*")
-    .limit(20);
+    .select("*");
 
   // If there is an error fetching recipes, return early
   if (recipesError || !recipes) {
