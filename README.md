@@ -2,48 +2,48 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## 🛠️ Tech Stack
 
-| Component                                          | Technology                                      |
-| -------------------------------------------------- | ----------------------------------------------- |
-| Frontend                                           | Next.js (React) + Tailwind CSS + DaisyUI        |
-| Backend                                            | Next.js API Routes (Node.js)                    |
-| Image Processing                                   | YOLO / GPT-4V (for object detection)            |
-| Embeddings Model                                   | text-embedding-ada-002 (OpenAI) or Hugging Face |
-| Vector Database                                    | Pinecone                                        |
-| Recipe Generation                                  | GPT-4 (context-based customization)             |
-| AI Image Generation                                | DALL·E 3                                        |
-| Authentication                                     | Supabase Auth                                   |
-| Database (Optional for history & user preferences) | Supabase / PostgreSQL                           |
-| Hosting                                            | Vercel (Frontend & Serverless API)              |
+| Component                                          | Technology                               |
+| -------------------------------------------------- | ---------------------------------------- |
+| Frontend                                           | Next.js (React) + Tailwind CSS + DaisyUI |
+| Backend                                            | Next.js API Routes (Node.js)             |
+| Image Processing                                   | GPT-4V (for object detection)            |
+| Embeddings Model                                   | text-embedding-ada-3                     |
+| Vector Database                                    | Pinecone Vector DB                       |
+| Recipe Generation                                  | GPT-4 (context-based customization)      |
+| AI Image Generation                                | DALL·E 2                                 |
+| Authentication                                     | Next Auth                                |
+| Database (Optional for history & user preferences) | Supabase / PostgreSQL                    |
+| Hosting                                            | Vercel (Frontend & Serverless API)       |
 
 ## Application Architecture
 
-### User uploads a fridge image
+### 1. User uploads a fridge image
 
 1. The user takes a picture of their fridge and uploads it.
 
-### AI processes the image to detect ingredients
+### 2. AI processes the image to detect ingredients
 
-1. A computer vision model (YOLO, CLIP, or OpenAI GPT-4V if available) identifies the ingredients.
-2. Detected ingredients are extracted as structured text.
+1. A computer vision model (OpenAI GPT-4V) identifies the ingredients.
+2. Detected ingredients are extracted as structured array text response.
 
-### Generate an embedding for the detected ingredients
+### 3. Generate an embedding for the detected ingredients
 
-1. Convert the extracted ingredient list into a vector using OpenAI's text-embedding-ada-002 (or an alternative embedding model).
+1. Convert the extracted ingredient list into a vector using OpenAI's text-embedding-ada-3.
 
-### Search for relevant recipes in Pinecone
+### 4. Search for relevant recipes in Pinecone
 
 1. Perform a vector similarity search in Pinecone to find recipes that closely match the detected ingredients.
 
-### Provide context to GPT-4 for recipe customization
+### 5. Provide context to GPT-4 for recipe customization
 
-1. Send the retrieved recipes + detected ingredients to GPT-4 with additional context.
+1. Send the retrieved recipes context from Pinecone + detected ingredients to GPT-4 with additional context.
 2. GPT-4 improves the recipe, suggests multiple variations, and provides additional tips (e.g., missing ingredients, substitutes, cooking methods).
 
-### (Optional) Generate an AI image of the dish
+### 6. Generate an AI image of the dish
 
-1. If the user wants a preview, DALL·E 3 (or another image model) generates an AI-rendered dish based on the recipe.
+1. If the user wants a preview, DALL·E 2 generates an AI-rendered dish based on the recipe.
 
-### Display final recipe recommendations
+### 7. Display final recipe recommendations
 
 1. The user sees multiple AI-enhanced recipes tailored to their fridge contents.
 2. They can save, share, or refine their choices.
