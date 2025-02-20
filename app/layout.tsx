@@ -35,7 +35,7 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html lang="en" data-theme="emerald">
       <AuthProvider session={session} user={user}>
         <body className={inter.className}>
           <Header />

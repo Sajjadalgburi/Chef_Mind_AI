@@ -8,6 +8,7 @@ import { handleGenerate } from "@/helpers";
 import MealCards from "@/components/Meal-Card/MealCards";
 import { MealPlanResponse } from "@/types";
 import useAuth from "@/hooks/useAuth";
+
 /**
  * Description: This is the main component for the home page. It contains the image upload section, the meal cards, and the footer.
  * @returns JSX.Element
@@ -60,8 +61,8 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center w-full bg-gradient-to-b">
-      <section className="w-full max-w-7xl px-4 flex flex-col items-center">
+    <main className="min-h-screen bg-base-200">
+      <section className="container mx-auto px-4">
         <Toaster position="top-center" reverseOrder={false} />
 
         {showResults ? (
@@ -71,7 +72,7 @@ export default function Home() {
             setRecipes={setRecipes}
           />
         ) : (
-          <div className="w-full flex flex-col items-center gap-8 py-8">
+          <div className="flex flex-col items-center gap-8 py-8">
             <Hero image={image as string} />
             <ImageUploadSection
               setImage={setImage}
