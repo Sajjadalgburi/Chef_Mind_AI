@@ -22,51 +22,49 @@ const AuthForm = () => {
   }, []);
 
   return (
-    <form className="flex flex-col w-[90%] md:w-[500px] mx-auto bg-white p-8 rounded-lg shadow-2xl">
-      <h1 className="text-3xl text-center md:text-4xl font-bold mb-6">
-        Welcome to Chef Mind
-      </h1>
+    <div className="card w-96 bg-base-100 shadow-xl">
+      <div className="card-body">
+        <h1 className="card-title text-3xl text-center justify-center">
+          Welcome to Chef Mind
+        </h1>
 
-      <p className="text-base text-center text-foreground mb-8">
-        Sign in with your favorite provider to get started
-      </p>
+        <p className="text-base text-center text-base-content/70 mt-2">
+          Sign in with your favorite provider to get started
+        </p>
 
-      <div className="flex flex-col gap-4">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center gap-3">
-            <Skeleton className="w-full h-14" />
-            <Skeleton className="w-full h-14" />
-          </div>
-        ) : (
-          providers &&
-          Object.values(providers).map((provider: any) => (
-            <button
-              type="button"
-              key={provider.name as string}
-              onClick={() => {
-                signIn(provider.id as string, {
-                  redirectTo: "/",
-                });
-                setIsLoggingIn(true);
-              }}
-              disabled={isLoggingIn}
-              className={`flex items-center justify-center capitalize ${
-                isLoggingIn
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:opacity-90 hover:scale-[1.02] cursor-pointer transition-all ease-in-out duration-200"
-              } gap-3 p-4 border rounded-lg ${
-                provider.name === "Google"
-                  ? "bg-white text-black"
-                  : "bg-black text-white"
-              } text-lg`}
-            >
-              {provider.name === "Google" ? <FaGoogle /> : <FaGithub />} Sign in
-              with {provider.name}
-            </button>
-          ))
-        )}
+        <div className="flex flex-col gap-4 mt-6">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center gap-3">
+              <Skeleton className="w-full h-14" />
+              <Skeleton className="w-full h-14" />
+            </div>
+          ) : (
+            providers &&
+            Object.values(providers).map((provider: any) => (
+              <button
+                type="button"
+                key={provider.name as string}
+                onClick={() => {
+                  signIn(provider.id as string, {
+                    redirectTo: "/",
+                  });
+                  setIsLoggingIn(true);
+                }}
+                disabled={isLoggingIn}
+                className={`btn btn-lg gap-3 ${
+                  provider.name === "Google"
+                    ? "btn-outline"
+                    : "btn-primary"
+                } ${isLoggingIn ? "btn-disabled" : ""}`}
+              >
+                {provider.name === "Google" ? <FaGoogle /> : <FaGithub />} Sign in
+                with {provider.name}
+              </button>
+            ))
+          )}
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 
