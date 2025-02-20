@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 import flattenColorPalette from "tailwindcss/lib/util/flattenColorPalette"; // Use import instead of require
+import "daisyui";
 
 export default {
   darkMode: ["class"],
@@ -70,6 +71,9 @@ export default {
     },
   },
   plugins: [animate, addVariablesForColors],
+  daisyui: {
+    themes: ["emerald"],
+  },
 } satisfies Config;
 
 // This plugin adds each Tailwind color as a global CSS variable, e.g. var(--gray-200).
