@@ -7,7 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { handleGenerate } from "@/helpers";
 import MealCards from "@/components/Meal-Card/MealCards";
 import { MealPlanResponse } from "@/types";
-
+import useAuth from "@/hooks/useAuth";
 /**
  * Description: This is the main component for the home page. It contains the image upload section, the meal cards, and the footer.
  * @returns JSX.Element
@@ -18,6 +18,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
   const [recipes, setRecipes] = useState<MealPlanResponse["recipes"]>([]);
+
+  const { user } = useAuth();
 
   const processImage = async (imageSrc: string) => {
     try {
@@ -42,13 +44,19 @@ export default function Home() {
   };
 
   const handleGenerateClick = async () => {
-    await handleGenerate({
-      image: image as string,
-      setLoading,
-      setShowResults,
-      setIsMealPlanLoading,
-      setRecipes,
-    });
+    if (user === null) {
+      const fakeEvent = () => {};
+      fakeEvent();
+    } else {
+      await handleGenerate({
+        image: image as string,
+        setLoading,
+        setShowResults,
+        setIsMealPlanLoading,
+        setRecipes,
+        userId: user?.id ?? "",
+      });
+    }
   };
 
   return (
