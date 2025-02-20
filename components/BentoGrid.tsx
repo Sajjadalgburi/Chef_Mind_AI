@@ -22,7 +22,7 @@ export function BentoGridSection({ content }: BentoGridProps) {
   }, [content]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="max-w-7xl mx-auto sm:px-4">
       <div className="grid grid-cols-1 md:grid-cols-2 grid-flow-dense lg:grid-cols-3 gap-6 ">
         {content?.map((recipe, i) => {
           const creator = recipe?.user;
@@ -61,7 +61,7 @@ export function BentoGridSection({ content }: BentoGridProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <div className="badge badge-primary badge-outline">
+                  <div className=" bg-base-200 badge text-black">
                     {recipe.cuisine}
                   </div>
                   <div
