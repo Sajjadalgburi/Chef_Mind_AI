@@ -29,7 +29,7 @@ export function BentoGridSection({ content }: BentoGridProps) {
 
           return (
             <Link
-              href={`/recipe/${recipe.id}`}
+              href={`/public/recipe?id=${recipe.id}`}
               key={`${recipe.title}-${i}`}
               className="group bg-white rounded-xl hover:scale-102 transform shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
             >
