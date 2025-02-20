@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 import flattenColorPalette from "tailwindcss/lib/util/flattenColorPalette"; // Use import instead of require
-import "daisyui";
+import daisyui from "daisyui";
 
 export default {
   darkMode: ["class"],
@@ -70,9 +70,16 @@ export default {
       },
     },
   },
-  plugins: [animate, addVariablesForColors],
+  plugins: [animate, addVariablesForColors, daisyui],
   daisyui: {
     themes: ["emerald"],
+    base: true,
+    styled: true,
+    defaultTheme: "emerald",
+    utils: true,
+    prefix: "",
+    logs: true,
+    themeRoot: ":root",
   },
 } satisfies Config;
 
