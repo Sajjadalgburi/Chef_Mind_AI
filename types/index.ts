@@ -33,6 +33,7 @@ export type GenerateMealPlanProps = {
   prompt: string;
   setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  userId: string;
 };
 
 export type MealPlanResponse = {
@@ -77,6 +78,7 @@ export interface GenerateHandlerProps {
   setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
   setIsMealPlanLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setRecipes: React.Dispatch<React.SetStateAction<MealPlanResponse["recipes"]>>;
+  userId?: string;
 }
 
 export type HandleResetProps = {
