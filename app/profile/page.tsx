@@ -4,10 +4,10 @@ import { MealPlanResponse } from "@/types";
 import React, { useState, useEffect } from "react";
 import { getUserRecipes, saveRecipe, removeRecipe } from "@/actions";
 import useAuth from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
 import toast from "react-hot-toast";
 import RecipeCard from "@/components/recipe_card_components/RecipeCard";
 import { useRouter } from "next/navigation";
+import LoadingStateSkeleton from "@/components/LoadingStateSkeleton";
 
 const Profile = () => {
   const [userRecipes, setUserRecipes] = useState<MealPlanResponse["recipes"]>(
@@ -190,7 +190,7 @@ const Profile = () => {
   };
 
   return (
-    <section className="min-h-screen p-10">
+    <section className="min-h-screen bg-base-200 py-12">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800">
           Your Saved Recipes
@@ -200,11 +200,7 @@ const Profile = () => {
         </p>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-96 w-full" />
-            ))}
-          </div>
+          <LoadingStateSkeleton />
         ) : userRecipes.length > 0 ? (
           <>
             <div
