@@ -177,6 +177,7 @@ export const generateMealPlan = async ({
   prompt,
   setShowResults,
   setLoading,
+  userId,
 }: GenerateMealPlanProps) => {
   try {
     setIsMealPlanLoading(true);
@@ -211,7 +212,10 @@ export const generateMealPlan = async ({
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ imagePrompt: meal.imagePrompt as string }),
+            body: JSON.stringify({
+              imagePrompt: meal.imagePrompt as string,
+              userId: userId as string,
+            }),
           });
 
           if (!imageRes.ok) {
@@ -259,6 +263,7 @@ export const handleGenerate = async ({
   setShowResults,
   setIsMealPlanLoading,
   setRecipes,
+  userId,
 }: GenerateHandlerProps) => {
   try {
     if (!image) {
@@ -375,6 +380,7 @@ export const handleGenerate = async ({
       setIsMealPlanLoading,
       setRecipes,
       prompt,
+      userId: userId as string,
       setShowResults,
       setLoading,
     });
