@@ -54,7 +54,7 @@ const ImageUploadSection: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-row md:flex-col items-center gap-4 w-full">
+    <div className="flex  flex-col items-center gap-4 w-full">
       <Card className="p-4 md:p-6 bg-white/50 backdrop-blur-sm border shadow-xl border-gray-200 w-full max-w-[100%] md:max-w-[80%] mx-auto">
         <div className="flex flex-col items-center gap-4">
           <div className="w-full">
